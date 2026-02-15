@@ -24,9 +24,9 @@ export function KeyValueRow({ automationId, sectionId, entry }: KeyValueRowProps
 
   return (
     <div className="flex items-center gap-3 py-2 group">
-      <div className="w-48 shrink-0">
+      <div className="w-48 shrink-0 overflow-hidden">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-mono">{entry.key}</span>
+          <span className="text-sm font-mono truncate">{entry.key}</span>
           {entry.required && <span className="text-red-500 text-xs">*</span>}
         </div>
         {entry.description && (
@@ -66,6 +66,8 @@ export function KeyValueRow({ automationId, sectionId, entry }: KeyValueRowProps
   );
 }
 
+const ringClass = 'focus-visible:ring-1 focus-visible:ring-offset-0';
+
 function ValueInput({
   type,
   value,
@@ -78,20 +80,71 @@ function ValueInput({
   onChange: (v: ConfigEntry['value']) => void;
 }) {
   switch (type) {
-    case 'boolean':
+    case 'bool':
       return (
         <Switch
           checked={value as boolean}
           onCheckedChange={(checked) => onChange(checked)}
         />
       );
-    case 'number':
+    case 'int4':
+    case 'int8':
       return (
         <Input
           type="number"
+          step="1"
           value={value as number}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="h-8 max-w-[200px]"
+          className={`h-8 max-w-[200px] ${ringClass}`}
+        />
+      );
+    case 'float8':
+      return (
+        <Input
+          type="number"
+          step="any"
+          value={value as number}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className={`h-8 max-w-[200px] ${ringClass}`}
+        />
+      );
+    case 'date':
+      return (
+        <Input
+          type="date"
+          value={value as string}
+          onChange={(e) => onChange(e.target.value)}
+          className={`h-8 max-w-[200px] ${ringClass}`}
+        />
+      );
+    case 'time':
+      return (
+        <Input
+          type="time"
+          step="1"
+          value={value as string}
+          onChange={(e) => onChange(e.target.value)}
+          className={`h-8 max-w-[220px] ${ringClass}`}
+        />
+      );
+    case 'timestamp':
+    case 'timestamptz':
+      return (
+        <Input
+          type="datetime-local"
+          step="1"
+          value={value as string}
+          onChange={(e) => onChange(e.target.value)}
+          className={`h-8 max-w-[260px] ${ringClass}`}
+        />
+      );
+    case 'jsonb':
+      return (
+        <textarea
+          value={value as string}
+          onChange={(e) => onChange(e.target.value)}
+          className={`flex w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm font-mono min-h-[32px] max-h-[120px] resize-y ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none ${ringClass}`}
+          rows={1}
         />
       );
     case 'secret':
@@ -100,7 +153,7 @@ function ValueInput({
           type={showSecret ? 'text' : 'password'}
           value={value as string}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 font-mono"
+          className={`h-8 font-mono ${ringClass}`}
         />
       );
     default:
@@ -109,7 +162,7 @@ function ValueInput({
           type="text"
           value={value as string}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8"
+          className={`h-8 ${ringClass}`}
         />
       );
   }

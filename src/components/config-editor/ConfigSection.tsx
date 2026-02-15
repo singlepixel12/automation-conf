@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -25,6 +27,7 @@ import { KeyValueRow } from './KeyValueRow';
 import { Plus, Trash2 } from 'lucide-react';
 import { useAutomationStore } from '@/stores/automationStore';
 import { toast } from '@/lib/useToast';
+import { cn } from '@/lib/utils';
 import type { ConfigSection as ConfigSectionType, ConfigEntryType } from '@/types/automation';
 
 interface ConfigSectionProps {
@@ -37,14 +40,18 @@ export function ConfigSectionComponent({ automationId, section }: ConfigSectionP
   const removeConfigSection = useAutomationStore((s) => s.removeConfigSection);
   const [adding, setAdding] = useState(false);
   const [newKey, setNewKey] = useState('');
-  const [newType, setNewType] = useState<ConfigEntryType>('string');
+  const [newType, setNewType] = useState<ConfigEntryType>('text');
+  const [attempted, setAttempted] = useState(false);
 
   const handleAddEntry = () => {
+    setAttempted(true);
     if (!newKey.trim()) return;
     const defaultValues: Record<ConfigEntryType, string | number | boolean> = {
-      string: '',
-      number: 0,
-      boolean: false,
+      text: '', uuid: '',
+      int4: 0, int8: 0, float8: 0,
+      bool: false,
+      date: '', time: '', timestamp: '', timestamptz: '',
+      jsonb: '{}',
       secret: '',
     };
     addConfigEntry(automationId, section.id, {
@@ -54,8 +61,9 @@ export function ConfigSectionComponent({ automationId, section }: ConfigSectionP
       required: false,
     });
     setNewKey('');
-    setNewType('string');
+    setNewType('text');
     setAdding(false);
+    setAttempted(false);
   };
 
   const handleRemoveSection = () => {
@@ -96,38 +104,72 @@ export function ConfigSectionComponent({ automationId, section }: ConfigSectionP
         )}
 
         {adding ? (
-          <div className="flex items-end gap-3 pt-3 border-t mt-3">
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs">Key</Label>
-              <Input
-                value={newKey}
-                onChange={(e) => setNewKey(e.target.value)}
-                placeholder="config_key"
-                className="h-8 font-mono"
-                onKeyDown={(e) => e.key === 'Enter' && handleAddEntry()}
-                autoFocus
-              />
-            </div>
-            <div className="w-32 space-y-1">
+          <div className="relative pt-3 border-t mt-3">
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Key</Label>
+                <Input
+                  value={newKey}
+                  onChange={(e) => setNewKey(e.target.value)}
+                  placeholder="config_key"
+                  className={cn(
+                    'h-8 font-mono focus-visible:ring-1 focus-visible:ring-offset-0',
+                    attempted && !newKey.trim() && 'border-destructive ring-1 ring-destructive/30'
+                  )}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddEntry()}
+                  autoFocus
+                />
+              </div>
+            <div className="w-40 space-y-1">
               <Label className="text-xs">Type</Label>
               <Select value={newType} onValueChange={(v) => setNewType(v as ConfigEntryType)}>
                 <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="string">string</SelectItem>
-                  <SelectItem value="number">number</SelectItem>
-                  <SelectItem value="boolean">boolean</SelectItem>
-                  <SelectItem value="secret">secret</SelectItem>
+                  <SelectGroup>
+                    <SelectLabel>Text</SelectLabel>
+                    <SelectItem value="text">text</SelectItem>
+                    <SelectItem value="uuid">uuid</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Numeric</SelectLabel>
+                    <SelectItem value="int4">int4</SelectItem>
+                    <SelectItem value="int8">int8</SelectItem>
+                    <SelectItem value="float8">float8</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Boolean</SelectLabel>
+                    <SelectItem value="bool">bool</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Date & Time</SelectLabel>
+                    <SelectItem value="date">date</SelectItem>
+                    <SelectItem value="time">time</SelectItem>
+                    <SelectItem value="timestamp">timestamp</SelectItem>
+                    <SelectItem value="timestamptz">timestamptz</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>JSON</SelectLabel>
+                    <SelectItem value="jsonb">jsonb</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Other</SelectLabel>
+                    <SelectItem value="secret">secret</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
-            <Button size="sm" onClick={handleAddEntry} className="h-8">
-              Add
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setAdding(false)} className="h-8">
-              Cancel
-            </Button>
+              <Button size="sm" onClick={handleAddEntry} className="h-8">
+                Add
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => { setAdding(false); setAttempted(false); }} className="h-8">
+                Cancel
+              </Button>
+            </div>
+            {attempted && !newKey.trim() && (
+              <p className="text-[11px] text-destructive mt-1">Key is required</p>
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-between pt-3 mt-3 border-t">

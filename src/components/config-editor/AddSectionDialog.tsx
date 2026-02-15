@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAutomationStore } from '@/stores/automationStore';
 import { toast } from '@/lib/useToast';
+import { cn } from '@/lib/utils';
 
 interface AddSectionDialogProps {
   automationId: string;
@@ -23,9 +24,11 @@ export function AddSectionDialog({ automationId, open, onOpenChange }: AddSectio
   const addConfigSection = useAutomationStore((s) => s.addConfigSection);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [attempted, setAttempted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setAttempted(true);
     if (!name.trim()) return;
     addConfigSection(automationId, {
       name: name.trim(),
@@ -34,6 +37,7 @@ export function AddSectionDialog({ automationId, open, onOpenChange }: AddSectio
     });
     setName('');
     setDescription('');
+    setAttempted(false);
     onOpenChange(false);
     toast('Section added');
   };
@@ -46,16 +50,21 @@ export function AddSectionDialog({ automationId, open, onOpenChange }: AddSectio
           <DialogDescription>Add a new configuration section to group related settings.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-2 relative pb-4">
             <Label htmlFor="section-name">Section Name</Label>
             <Input
               id="section-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Database Connection"
-              required
+              className={cn(
+                attempted && !name.trim() && 'border-destructive ring-1 ring-destructive/30'
+              )}
               autoFocus
             />
+            {attempted && !name.trim() && (
+              <p className="absolute bottom-0 text-[11px] text-destructive">Section name is required</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="section-desc">Description (optional)</Label>

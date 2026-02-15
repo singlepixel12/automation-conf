@@ -13,24 +13,25 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-08-15T09:00:00Z',
     version: '2.4.1',
     tags: ['finance', 'sap', 'email'],
+    cronExpression: '*/15 8-18 * * 1-5',
     config: [
       {
         id: 'cs-001',
         name: 'Email Connection',
         description: 'IMAP settings for invoice mailbox',
         entries: [
-          { id: 'ce-001', key: 'imap_host', value: 'mail.acmecorp.com', type: 'string', description: 'IMAP server hostname', required: true },
-          { id: 'ce-002', key: 'imap_port', value: 993, type: 'number', description: 'IMAP port', required: true },
+          { id: 'ce-001', key: 'imap_host', value: 'mail.acmecorp.com', type: 'text', description: 'IMAP server hostname', required: true },
+          { id: 'ce-002', key: 'imap_port', value: 993, type: 'int4', description: 'IMAP port', required: true },
           { id: 'ce-003', key: 'imap_password', value: '••••••••', type: 'secret', description: 'Mailbox password', required: true },
-          { id: 'ce-004', key: 'use_ssl', value: true, type: 'boolean', description: 'Enable SSL/TLS', required: true },
+          { id: 'ce-004', key: 'use_ssl', value: true, type: 'bool', description: 'Enable SSL/TLS', required: true },
         ],
       },
       {
         id: 'cs-002',
         name: 'SAP Integration',
         entries: [
-          { id: 'ce-005', key: 'sap_endpoint', value: 'https://sap.acmecorp.com/api', type: 'string', required: true },
-          { id: 'ce-006', key: 'sap_client_id', value: 'INV_BOT_PROD', type: 'string', required: true },
+          { id: 'ce-005', key: 'sap_endpoint', value: 'https://sap.acmecorp.com/api', type: 'text', required: true },
+          { id: 'ce-006', key: 'sap_client_id', value: 'INV_BOT_PROD', type: 'text', required: true },
           { id: 'ce-007', key: 'sap_api_key', value: '••••••••', type: 'secret', required: true },
         ],
       },
@@ -38,9 +39,9 @@ export const mockAutomations: Automation[] = [
         id: 'cs-003',
         name: 'Error Handling',
         entries: [
-          { id: 'ce-008', key: 'max_retries', value: 3, type: 'number', required: false },
-          { id: 'ce-009', key: 'notify_on_failure', value: true, type: 'boolean', required: false },
-          { id: 'ce-010', key: 'alert_email', value: 'ops-team@acmecorp.com', type: 'string', required: false },
+          { id: 'ce-008', key: 'max_retries', value: 3, type: 'int4', required: false },
+          { id: 'ce-009', key: 'notify_on_failure', value: true, type: 'bool', required: false },
+          { id: 'ce-010', key: 'alert_email', value: 'ops-team@acmecorp.com', type: 'text', required: false },
         ],
       },
     ],
@@ -57,13 +58,14 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-06-01T08:00:00Z',
     version: '1.8.0',
     tags: ['reporting', 'sales', 'daily'],
+    cronExpression: '0 6 * * *',
     config: [
       {
         id: 'cs-004',
         name: 'Schedule',
         entries: [
-          { id: 'ce-011', key: 'cron_expression', value: '0 6 * * *', type: 'string', description: 'Cron schedule', required: true },
-          { id: 'ce-012', key: 'timezone', value: 'America/New_York', type: 'string', required: true },
+          { id: 'ce-011', key: 'cron_expression', value: '0 6 * * *', type: 'text', description: 'Cron schedule', required: true },
+          { id: 'ce-012', key: 'timezone', value: 'America/New_York', type: 'text', required: true },
         ],
       },
       {
@@ -71,15 +73,15 @@ export const mockAutomations: Automation[] = [
         name: 'Database',
         entries: [
           { id: 'ce-013', key: 'db_connection_string', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-014', key: 'query_timeout_sec', value: 120, type: 'number', required: false },
+          { id: 'ce-014', key: 'query_timeout_sec', value: 120, type: 'int4', required: false },
         ],
       },
       {
         id: 'cs-006',
         name: 'Distribution',
         entries: [
-          { id: 'ce-015', key: 'recipients', value: 'sales-leads@acmecorp.com', type: 'string', required: true },
-          { id: 'ce-016', key: 'include_csv', value: true, type: 'boolean', required: false },
+          { id: 'ce-015', key: 'recipients', value: 'sales-leads@acmecorp.com', type: 'text', required: true },
+          { id: 'ce-016', key: 'include_csv', value: true, type: 'bool', required: false },
         ],
       },
     ],
@@ -96,22 +98,23 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-04-20T10:00:00Z',
     version: '3.1.0',
     tags: ['etl', 'crm', 'warehouse'],
+    cronExpression: '0 2 * * *',
     config: [
       {
         id: 'cs-007',
         name: 'Source - CRM',
         entries: [
-          { id: 'ce-017', key: 'crm_api_url', value: 'https://api.salesforce.com/v55', type: 'string', required: true },
+          { id: 'ce-017', key: 'crm_api_url', value: 'https://api.salesforce.com/v55', type: 'text', required: true },
           { id: 'ce-018', key: 'crm_token', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-019', key: 'batch_size', value: 500, type: 'number', required: false },
+          { id: 'ce-019', key: 'batch_size', value: 500, type: 'int4', required: false },
         ],
       },
       {
         id: 'cs-008',
         name: 'Target - Warehouse',
         entries: [
-          { id: 'ce-020', key: 'warehouse_host', value: 'dwh.acmecorp.internal', type: 'string', required: true },
-          { id: 'ce-021', key: 'warehouse_db', value: 'analytics_prod', type: 'string', required: true },
+          { id: 'ce-020', key: 'warehouse_host', value: 'dwh.acmecorp.internal', type: 'text', required: true },
+          { id: 'ce-021', key: 'warehouse_db', value: 'analytics_prod', type: 'text', required: true },
           { id: 'ce-022', key: 'warehouse_password', value: '••••••••', type: 'secret', required: true },
         ],
       },
@@ -135,8 +138,8 @@ export const mockAutomations: Automation[] = [
         name: 'Slack API',
         entries: [
           { id: 'ce-023', key: 'webhook_url', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-024', key: 'default_channel', value: '#ops-alerts', type: 'string', required: true },
-          { id: 'ce-025', key: 'bot_name', value: 'AutoBot', type: 'string', required: false },
+          { id: 'ce-024', key: 'default_channel', value: '#ops-alerts', type: 'text', required: true },
+          { id: 'ce-025', key: 'bot_name', value: 'AutoBot', type: 'text', required: false },
         ],
       },
     ],
@@ -153,14 +156,15 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-07-05T11:00:00Z',
     version: '1.5.2',
     tags: ['sftp', 'vendor', 'pricing'],
+    cronExpression: '0 22 * * *',
     config: [
       {
         id: 'cs-010',
         name: 'SFTP Connection',
         entries: [
-          { id: 'ce-026', key: 'sftp_host', value: 'sftp.vendor-partner.com', type: 'string', required: true },
-          { id: 'ce-027', key: 'sftp_port', value: 22, type: 'number', required: true },
-          { id: 'ce-028', key: 'sftp_username', value: 'acme_sync', type: 'string', required: true },
+          { id: 'ce-026', key: 'sftp_host', value: 'sftp.vendor-partner.com', type: 'text', required: true },
+          { id: 'ce-027', key: 'sftp_port', value: 22, type: 'int4', required: true },
+          { id: 'ce-028', key: 'sftp_username', value: 'acme_sync', type: 'text', required: true },
           { id: 'ce-029', key: 'sftp_private_key', value: '••••••••', type: 'secret', required: true },
         ],
       },
@@ -168,10 +172,10 @@ export const mockAutomations: Automation[] = [
         id: 'cs-011',
         name: 'File Settings',
         entries: [
-          { id: 'ce-030', key: 'remote_path', value: '/outbound/pricing/', type: 'string', required: true },
-          { id: 'ce-031', key: 'local_path', value: '/data/vendor/pricing/', type: 'string', required: true },
-          { id: 'ce-032', key: 'file_pattern', value: '*.csv', type: 'string', required: false },
-          { id: 'ce-033', key: 'delete_after_download', value: false, type: 'boolean', required: false },
+          { id: 'ce-030', key: 'remote_path', value: '/outbound/pricing/', type: 'text', required: true },
+          { id: 'ce-031', key: 'local_path', value: '/data/vendor/pricing/', type: 'text', required: true },
+          { id: 'ce-032', key: 'file_pattern', value: '*.csv', type: 'text', required: false },
+          { id: 'ce-033', key: 'delete_after_download', value: false, type: 'bool', required: false },
         ],
       },
     ],
@@ -188,13 +192,14 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-10-01T09:00:00Z',
     version: '1.3.0',
     tags: ['hr', 'onboarding', 'active-directory'],
+    cronExpression: '0 9 * * 1-5',
     config: [
       {
         id: 'cs-012',
         name: 'Active Directory',
         entries: [
-          { id: 'ce-034', key: 'ad_server', value: 'ldap://ad.acmecorp.com', type: 'string', required: true },
-          { id: 'ce-035', key: 'ad_base_dn', value: 'DC=acmecorp,DC=com', type: 'string', required: true },
+          { id: 'ce-034', key: 'ad_server', value: 'ldap://ad.acmecorp.com', type: 'text', required: true },
+          { id: 'ce-035', key: 'ad_base_dn', value: 'DC=acmecorp,DC=com', type: 'text', required: true },
           { id: 'ce-036', key: 'ad_admin_password', value: '••••••••', type: 'secret', required: true },
         ],
       },
@@ -202,8 +207,8 @@ export const mockAutomations: Automation[] = [
         id: 'cs-013',
         name: 'Email Provisioning',
         entries: [
-          { id: 'ce-037', key: 'mail_domain', value: 'acmecorp.com', type: 'string', required: true },
-          { id: 'ce-038', key: 'default_quota_gb', value: 50, type: 'number', required: false },
+          { id: 'ce-037', key: 'mail_domain', value: 'acmecorp.com', type: 'text', required: true },
+          { id: 'ce-038', key: 'default_quota_gb', value: 50, type: 'int4', required: false },
         ],
       },
     ],
@@ -220,22 +225,23 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-05-15T10:00:00Z',
     version: '1.0.4',
     tags: ['logs', 'cleanup', 'maintenance'],
+    cronExpression: '0 3 * * 0',
     config: [
       {
         id: 'cs-014',
         name: 'Retention Policy',
         entries: [
-          { id: 'ce-039', key: 'retention_days', value: 90, type: 'number', required: true },
-          { id: 'ce-040', key: 'archive_before_delete', value: true, type: 'boolean', required: true },
-          { id: 'ce-041', key: 'archive_path', value: '/archive/logs/', type: 'string', required: true },
+          { id: 'ce-039', key: 'retention_days', value: 90, type: 'int4', required: true },
+          { id: 'ce-040', key: 'archive_before_delete', value: true, type: 'bool', required: true },
+          { id: 'ce-041', key: 'archive_path', value: '/archive/logs/', type: 'text', required: true },
         ],
       },
       {
         id: 'cs-015',
         name: 'Target Directories',
         entries: [
-          { id: 'ce-042', key: 'log_directories', value: '/var/log/app,/var/log/web', type: 'string', required: true },
-          { id: 'ce-043', key: 'dry_run', value: false, type: 'boolean', required: false },
+          { id: 'ce-042', key: 'log_directories', value: '/var/log/app,/var/log/web', type: 'text', required: true },
+          { id: 'ce-043', key: 'dry_run', value: false, type: 'bool', required: false },
         ],
       },
     ],
@@ -252,21 +258,22 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-11-20T14:00:00Z',
     version: '2.0.1',
     tags: ['inventory', 'erp', 'ecommerce', 'critical'],
+    cronExpression: '*/15 * * * *',
     config: [
       {
         id: 'cs-016',
         name: 'ERP Connection',
         entries: [
-          { id: 'ce-044', key: 'erp_api_endpoint', value: 'https://erp.acmecorp.com/api/v2', type: 'string', required: true },
+          { id: 'ce-044', key: 'erp_api_endpoint', value: 'https://erp.acmecorp.com/api/v2', type: 'text', required: true },
           { id: 'ce-045', key: 'erp_api_key', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-046', key: 'sync_interval_min', value: 15, type: 'number', required: true },
+          { id: 'ce-046', key: 'sync_interval_min', value: 15, type: 'int4', required: true },
         ],
       },
       {
         id: 'cs-017',
         name: 'E-Commerce Platform',
         entries: [
-          { id: 'ce-047', key: 'shop_api_url', value: 'https://api.shopify.com/admin', type: 'string', required: true },
+          { id: 'ce-047', key: 'shop_api_url', value: 'https://api.shopify.com/admin', type: 'text', required: true },
           { id: 'ce-048', key: 'shop_access_token', value: '••••••••', type: 'secret', required: true },
         ],
       },
@@ -291,15 +298,15 @@ export const mockAutomations: Automation[] = [
         entries: [
           { id: 'ce-049', key: 'stripe_secret_key', value: '••••••••', type: 'secret', required: true },
           { id: 'ce-050', key: 'webhook_signing_secret', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-051', key: 'api_version', value: '2025-12-01', type: 'string', required: true },
+          { id: 'ce-051', key: 'api_version', value: '2025-12-01', type: 'text', required: true },
         ],
       },
       {
         id: 'cs-019',
         name: 'Processing',
         entries: [
-          { id: 'ce-052', key: 'idempotency_ttl_hours', value: 24, type: 'number', required: false },
-          { id: 'ce-053', key: 'auto_capture', value: true, type: 'boolean', required: false },
+          { id: 'ce-052', key: 'idempotency_ttl_hours', value: 24, type: 'int4', required: false },
+          { id: 'ce-053', key: 'auto_capture', value: true, type: 'bool', required: false },
         ],
       },
     ],
@@ -316,13 +323,14 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-02-10T09:00:00Z',
     version: '1.1.0',
     tags: ['backup', 's3', 'database'],
+    cronExpression: '0 1 * * *',
     config: [
       {
         id: 'cs-020',
         name: 'AWS S3',
         entries: [
-          { id: 'ce-054', key: 's3_bucket', value: 'acme-db-backups-prod', type: 'string', required: true },
-          { id: 'ce-055', key: 's3_region', value: 'us-east-1', type: 'string', required: true },
+          { id: 'ce-054', key: 's3_bucket', value: 'acme-db-backups-prod', type: 'text', required: true },
+          { id: 'ce-055', key: 's3_region', value: 'us-east-1', type: 'text', required: true },
           { id: 'ce-056', key: 'aws_access_key', value: '••••••••', type: 'secret', required: true },
           { id: 'ce-057', key: 'aws_secret_key', value: '••••••••', type: 'secret', required: true },
         ],
@@ -331,9 +339,9 @@ export const mockAutomations: Automation[] = [
         id: 'cs-021',
         name: 'Backup Settings',
         entries: [
-          { id: 'ce-058', key: 'source_path', value: '/backups/db/', type: 'string', required: true },
-          { id: 'ce-059', key: 'compress', value: true, type: 'boolean', required: true },
-          { id: 'ce-060', key: 'encryption_enabled', value: true, type: 'boolean', required: true },
+          { id: 'ce-058', key: 'source_path', value: '/backups/db/', type: 'text', required: true },
+          { id: 'ce-059', key: 'compress', value: true, type: 'bool', required: true },
+          { id: 'ce-060', key: 'encryption_enabled', value: true, type: 'bool', required: true },
         ],
       },
     ],
@@ -355,8 +363,8 @@ export const mockAutomations: Automation[] = [
         id: 'cs-022',
         name: 'Approval Rules',
         entries: [
-          { id: 'ce-061', key: 'auto_approve_limit', value: 100, type: 'number', description: 'Auto-approve under this amount', required: true },
-          { id: 'ce-062', key: 'require_receipt', value: true, type: 'boolean', required: true },
+          { id: 'ce-061', key: 'auto_approve_limit', value: 100, type: 'int4', description: 'Auto-approve under this amount', required: true },
+          { id: 'ce-062', key: 'require_receipt', value: true, type: 'bool', required: true },
         ],
       },
     ],
@@ -373,13 +381,14 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-07-22T08:00:00Z',
     version: '1.2.0',
     tags: ['database', 'postgres', 'maintenance'],
+    cronExpression: '0 2 * * 0',
     config: [
       {
         id: 'cs-023',
         name: 'Database',
         entries: [
-          { id: 'ce-063', key: 'db_host', value: 'pg-primary.acmecorp.internal', type: 'string', required: true },
-          { id: 'ce-064', key: 'db_name', value: 'app_production', type: 'string', required: true },
+          { id: 'ce-063', key: 'db_host', value: 'pg-primary.acmecorp.internal', type: 'text', required: true },
+          { id: 'ce-064', key: 'db_name', value: 'app_production', type: 'text', required: true },
           { id: 'ce-065', key: 'db_password', value: '••••••••', type: 'secret', required: true },
         ],
       },
@@ -387,10 +396,10 @@ export const mockAutomations: Automation[] = [
         id: 'cs-024',
         name: 'Maintenance Options',
         entries: [
-          { id: 'ce-066', key: 'run_vacuum', value: true, type: 'boolean', required: true },
-          { id: 'ce-067', key: 'run_analyze', value: true, type: 'boolean', required: true },
-          { id: 'ce-068', key: 'rebuild_indexes', value: true, type: 'boolean', required: false },
-          { id: 'ce-069', key: 'maintenance_window_hours', value: 2, type: 'number', required: false },
+          { id: 'ce-066', key: 'run_vacuum', value: true, type: 'bool', required: true },
+          { id: 'ce-067', key: 'run_analyze', value: true, type: 'bool', required: true },
+          { id: 'ce-068', key: 'rebuild_indexes', value: true, type: 'bool', required: false },
+          { id: 'ce-069', key: 'maintenance_window_hours', value: 2, type: 'int4', required: false },
         ],
       },
     ],
@@ -421,7 +430,7 @@ export const mockAutomations: Automation[] = [
         name: 'Meta Ads',
         entries: [
           { id: 'ce-072', key: 'meta_access_token', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-073', key: 'meta_ad_account_id', value: 'act_123456789', type: 'string', required: true },
+          { id: 'ce-073', key: 'meta_ad_account_id', value: 'act_123456789', type: 'text', required: true },
         ],
       },
     ],
@@ -438,14 +447,15 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-09-25T11:00:00Z',
     version: '1.4.0',
     tags: ['jira', 'github', 'devops'],
+    cronExpression: '*/5 * * * *',
     config: [
       {
         id: 'cs-027',
         name: 'Jira',
         entries: [
-          { id: 'ce-074', key: 'jira_base_url', value: 'https://acmecorp.atlassian.net', type: 'string', required: true },
+          { id: 'ce-074', key: 'jira_base_url', value: 'https://acmecorp.atlassian.net', type: 'text', required: true },
           { id: 'ce-075', key: 'jira_api_token', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-076', key: 'jira_project_key', value: 'ACME', type: 'string', required: true },
+          { id: 'ce-076', key: 'jira_project_key', value: 'ACME', type: 'text', required: true },
         ],
       },
       {
@@ -453,7 +463,7 @@ export const mockAutomations: Automation[] = [
         name: 'GitHub',
         entries: [
           { id: 'ce-077', key: 'github_token', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-078', key: 'github_repo', value: 'acmecorp/platform', type: 'string', required: true },
+          { id: 'ce-078', key: 'github_repo', value: 'acmecorp/platform', type: 'text', required: true },
         ],
       },
     ],
@@ -475,9 +485,9 @@ export const mockAutomations: Automation[] = [
         id: 'cs-029',
         name: 'SharePoint',
         entries: [
-          { id: 'ce-079', key: 'sharepoint_site', value: 'https://acmecorp.sharepoint.com/sites/legal', type: 'string', required: true },
+          { id: 'ce-079', key: 'sharepoint_site', value: 'https://acmecorp.sharepoint.com/sites/legal', type: 'text', required: true },
           { id: 'ce-080', key: 'sharepoint_client_secret', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-081', key: 'target_library', value: 'Signed Contracts', type: 'string', required: true },
+          { id: 'ce-081', key: 'target_library', value: 'Signed Contracts', type: 'text', required: true },
         ],
       },
     ],
@@ -499,9 +509,9 @@ export const mockAutomations: Automation[] = [
         id: 'cs-030',
         name: 'Approval Thresholds',
         entries: [
-          { id: 'ce-082', key: 'tier1_limit', value: 5000, type: 'number', description: 'Manager approval limit', required: true },
-          { id: 'ce-083', key: 'tier2_limit', value: 25000, type: 'number', description: 'Director approval limit', required: true },
-          { id: 'ce-084', key: 'require_3_quotes', value: true, type: 'boolean', required: true },
+          { id: 'ce-082', key: 'tier1_limit', value: 5000, type: 'int4', description: 'Manager approval limit', required: true },
+          { id: 'ce-083', key: 'tier2_limit', value: 25000, type: 'int4', description: 'Director approval limit', required: true },
+          { id: 'ce-084', key: 'require_3_quotes', value: true, type: 'bool', required: true },
         ],
       },
     ],
@@ -518,22 +528,23 @@ export const mockAutomations: Automation[] = [
     createdAt: '2025-05-10T08:00:00Z',
     version: '2.0.0',
     tags: ['compliance', 'sox', 'audit', 'monthly'],
+    cronExpression: '0 4 1 * *',
     config: [
       {
         id: 'cs-031',
         name: 'Report Settings',
         entries: [
-          { id: 'ce-085', key: 'cron_expression', value: '0 4 1 * *', type: 'string', description: 'First of month at 4 AM', required: true },
-          { id: 'ce-086', key: 'report_format', value: 'pdf', type: 'string', required: true },
-          { id: 'ce-087', key: 'include_details', value: true, type: 'boolean', required: false },
+          { id: 'ce-085', key: 'cron_expression', value: '0 4 1 * *', type: 'text', description: 'First of month at 4 AM', required: true },
+          { id: 'ce-086', key: 'report_format', value: 'pdf', type: 'text', required: true },
+          { id: 'ce-087', key: 'include_details', value: true, type: 'bool', required: false },
         ],
       },
       {
         id: 'cs-032',
         name: 'Audit Repository',
         entries: [
-          { id: 'ce-088', key: 'repo_path', value: '/audit/sox-reports/', type: 'string', required: true },
-          { id: 'ce-089', key: 'retention_years', value: 7, type: 'number', required: true },
+          { id: 'ce-088', key: 'repo_path', value: '/audit/sox-reports/', type: 'text', required: true },
+          { id: 'ce-089', key: 'retention_years', value: 7, type: 'int4', required: true },
         ],
       },
     ],
@@ -556,8 +567,8 @@ export const mockAutomations: Automation[] = [
         name: 'API Settings',
         entries: [
           { id: 'ce-090', key: 'api_key', value: '••••••••', type: 'secret', required: true },
-          { id: 'ce-091', key: 'base_url', value: 'https://api.openweathermap.org/data/3.0', type: 'string', required: true },
-          { id: 'ce-092', key: 'poll_interval_min', value: 30, type: 'number', required: false },
+          { id: 'ce-091', key: 'base_url', value: 'https://api.openweathermap.org/data/3.0', type: 'text', required: true },
+          { id: 'ce-092', key: 'poll_interval_min', value: 30, type: 'int4', required: false },
         ],
       },
     ],

@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Calendar, User, Tag, Globe, GitBranch, X, Plus, Copy, Check, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Tag, Globe, GitBranch, X, Plus, Copy, Check, Trash2, Files } from 'lucide-react';
 import { TYPE_LABELS, STATUS_COLORS } from '@/types/automation';
 import type { AutomationType, AutomationStatus, Environment } from '@/types/automation';
 import { cn } from '@/lib/utils';
@@ -47,11 +47,14 @@ export function ConfigDetailPage() {
   const automation = useAutomationStore((s) => s.automations.find((a) => a.id === id));
   const updateAutomation = useAutomationStore((s) => s.updateAutomation);
   const deleteAutomation = useAutomationStore((s) => s.deleteAutomation);
+  const duplicateAutomation = useAutomationStore((s) => s.duplicateAutomation);
   const navigate = useNavigate();
 
   const [tagInput, setTagInput] = useState('');
   const [copied, setCopied] = useState(false);
   const [copiedEndpoint, setCopiedEndpoint] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
 
   if (!automation) {
     return (
@@ -90,6 +93,27 @@ export function ConfigDetailPage() {
     toast('Automation deleted');
   };
 
+  const handleDuplicate = () => {
+    const newId = duplicateAutomation(automation.id);
+    if (newId) {
+      navigate(`/automations/${newId}`);
+      toast('Automation duplicated');
+    }
+  };
+
+  const handleNameDoubleClick = () => {
+    setNameValue(automation.name);
+    setEditingName(true);
+  };
+
+  const handleNameSave = () => {
+    const trimmed = nameValue.trim();
+    if (trimmed && trimmed !== automation.name) {
+      updateAutomation(automation.id, { name: trimmed });
+    }
+    setEditingName(false);
+  };
+
   return (
     <motion.div
       className="space-y-6"
@@ -105,7 +129,27 @@ export function ConfigDetailPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold tracking-tight">{automation.name}</h2>
+            {editingName ? (
+              <Input
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                onBlur={handleNameSave}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleNameSave();
+                  if (e.key === 'Escape') setEditingName(false);
+                }}
+                className="text-2xl font-bold tracking-tight h-auto py-0 px-1 border-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                autoFocus
+              />
+            ) : (
+              <h2
+                className="text-2xl font-bold tracking-tight cursor-pointer hover:text-muted-foreground/80 transition-colors"
+                onDoubleClick={handleNameDoubleClick}
+                title="Double-click to rename"
+              >
+                {automation.name}
+              </h2>
+            )}
             <Select
               value={automation.status}
               onValueChange={(v) => updateAutomation(automation.id, { status: v as AutomationStatus })}
@@ -125,6 +169,9 @@ export function ConfigDetailPage() {
           </div>
           <p className="text-muted-foreground mt-1">{automation.description}</p>
         </div>
+        <Button variant="ghost" size="icon" onClick={handleDuplicate} title="Duplicate automation">
+          <Files className="h-4 w-4" />
+        </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
@@ -182,7 +229,7 @@ export function ConfigDetailPage() {
         <MetaItem
           icon={Calendar}
           label="Last Modified"
-          value={new Date(automation.lastModified).toLocaleDateString()}
+          value={new Date(automation.lastModified).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
         />
       </motion.div>
 
@@ -260,9 +307,11 @@ export function ConfigDetailPage() {
                   <span className="text-muted-foreground">ID</span>
                   <span className="font-mono">{automation.id}</span>
                   <span className="text-muted-foreground">Created</span>
-                  <span>{new Date(automation.createdAt).toLocaleString()}</span>
+                  <span>{new Date(automation.createdAt).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   <span className="text-muted-foreground">Last Modified</span>
-                  <span>{new Date(automation.lastModified).toLocaleString()}</span>
+                  <span>{new Date(automation.lastModified).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="text-muted-foreground">CRON Schedule</span>
+                  <span className="font-mono">{automation.cronExpression || '\u2014'}</span>
                   <span className="text-muted-foreground">Config Sections</span>
                   <span>{automation.config.length}</span>
                   <span className="text-muted-foreground">Total Config Entries</span>

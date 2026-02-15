@@ -90,11 +90,20 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
         filter: true,
       },
       {
+        field: 'cronExpression',
+        headerName: 'CRON Schedule',
+        flex: 1,
+        minWidth: 140,
+        editable: true,
+        cellClass: 'font-mono',
+        valueFormatter: (params) => params.value ?? '\u2014',
+      },
+      {
         field: 'lastModified',
         headerName: 'Last Modified',
         flex: 1,
         minWidth: 140,
-        valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+        valueFormatter: (params) => new Date(params.value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }),
         sort: 'desc',
       },
       {

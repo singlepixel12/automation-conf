@@ -1,7 +1,13 @@
 export type AutomationType = 'rpa-bot' | 'scheduled-script' | 'data-pipeline' | 'api-integration' | 'file-transfer';
 export type AutomationStatus = 'active' | 'inactive' | 'error' | 'draft';
 export type Environment = 'production' | 'staging' | 'development';
-export type ConfigEntryType = 'string' | 'number' | 'boolean' | 'secret';
+export type ConfigEntryType =
+  | 'text' | 'uuid'
+  | 'int4' | 'int8' | 'float8'
+  | 'bool'
+  | 'date' | 'time' | 'timestamp' | 'timestamptz'
+  | 'jsonb'
+  | 'secret';
 
 export interface ConfigEntry {
   id: string;
@@ -32,6 +38,7 @@ export interface Automation {
   version: string;
   tags: string[];
   config: ConfigSection[];
+  cronExpression?: string;
 }
 
 export const TYPE_LABELS: Record<AutomationType, string> = {

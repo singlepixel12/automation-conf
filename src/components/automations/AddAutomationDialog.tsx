@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { useAutomationStore } from '@/stores/automationStore';
 import { toast } from '@/lib/useToast';
+import { cn } from '@/lib/utils';
 import { TYPE_LABELS } from '@/types/automation';
 import type { AutomationType, Environment } from '@/types/automation';
 
@@ -34,9 +35,11 @@ export function AddAutomationDialog({ open, onOpenChange }: AddAutomationDialogP
   const [environment, setEnvironment] = useState<Environment>('development');
   const [owner, setOwner] = useState('');
   const [description, setDescription] = useState('');
+  const [attempted, setAttempted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setAttempted(true);
     if (!name.trim() || !owner.trim()) return;
     addAutomation({
       name: name.trim(),
@@ -52,6 +55,7 @@ export function AddAutomationDialog({ open, onOpenChange }: AddAutomationDialogP
     setDescription('');
     setType('rpa-bot');
     setEnvironment('development');
+    setAttempted(false);
     onOpenChange(false);
     toast('Automation created');
   };
@@ -64,9 +68,20 @@ export function AddAutomationDialog({ open, onOpenChange }: AddAutomationDialogP
           <DialogDescription>Create a new automation configuration.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-2 relative pb-4">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Automation" required />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="My Automation"
+              className={cn(
+                attempted && !name.trim() && 'border-destructive ring-1 ring-destructive/30'
+              )}
+            />
+            {attempted && !name.trim() && (
+              <p className="absolute bottom-0 text-[11px] text-destructive">Name is required</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -96,9 +111,20 @@ export function AddAutomationDialog({ open, onOpenChange }: AddAutomationDialogP
               </Select>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 relative pb-4">
             <Label htmlFor="owner">Owner</Label>
-            <Input id="owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="John Doe" required />
+            <Input
+              id="owner"
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+              placeholder="John Doe"
+              className={cn(
+                attempted && !owner.trim() && 'border-destructive ring-1 ring-destructive/30'
+              )}
+            />
+            {attempted && !owner.trim() && (
+              <p className="absolute bottom-0 text-[11px] text-destructive">Owner is required</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
