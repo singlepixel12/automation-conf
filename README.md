@@ -2,17 +2,15 @@
 
 A modern configuration management dashboard for automation workflows. Built as an internal tool PoC for managing, editing, and monitoring automation configs across environments.
 
-<img src="scorecard.png" width="100%">
-
 ## Features
 
-- **Dashboard** — At-a-glance stats with animated counters, type breakdown, and recent activity feed
-- **Automations Grid** — Sortable, filterable ag-Grid table with inline editing, quick search, and per-row delete
-- **Config Detail View** — Full config editor with accordion sections, key-value entry management, and metadata cards
-- **CRUD Operations** — Create, edit, and delete automations with toast notifications and confirmation dialogs
-- **Dark/Light Mode** — System-aware theme toggle with smooth transitions
-- **Responsive Layout** — Collapsible sidebar drawer on mobile, full sidebar on desktop
-- **Polished UX** — Framer Motion staggered animations, spring dialogs, animated progress bars, hover reveals
+- **Dashboard**: At-a-glance stats with animated counters, type breakdown, and recent activity feed
+- **Automations Grid**: Sortable, filterable ag-Grid table with inline editing, quick search, and per-row delete
+- **Config Detail View**: Full config editor with accordion sections, key-value entry management, and metadata cards
+- **CRUD Operations**: Create, edit, and delete automations with toast notifications and confirmation dialogs
+- **Dark/Light Mode**: System-aware theme toggle with smooth transitions
+- **Responsive Layout**: Collapsible sidebar drawer on mobile, full sidebar on desktop
+- **Polished UX**: Framer Motion staggered animations, spring dialogs, animated progress bars, hover reveals
 
 ## Tech Stack
 
@@ -65,4 +63,4 @@ src/
 
 ## Current Scope
 
-This is a **proof-of-concept** with mock data and client-side state. There is no backend, authentication, or persistent storage — all data lives in Zustand and resets on refresh.
+This is a **proof-of-concept** with mock data and client-side state. There is no backend, authentication, or persistent storage; all data lives in Zustand and resets on refresh.
