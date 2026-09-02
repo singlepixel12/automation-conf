@@ -34,6 +34,24 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+## Usage
+
+Run the app locally with Node.js installed:
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Start the Vite dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+3. Open [http://localhost:5173](http://localhost:5173) — Vite serves the app on port 5173 by default.
+
 ## Scripts
 
 | Command | Description |
