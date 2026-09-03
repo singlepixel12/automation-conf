@@ -38,7 +38,7 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
 
       <aside
         className={cn(
-          'bg-sidebar-background flex flex-col h-screen sticky top-0 shrink-0 transition-all duration-200 ease-in-out',
+          'bg-sidebar-background border-r border-sidebar-border lg:border-r-0 flex flex-col h-screen sticky top-0 shrink-0 transition-all duration-200 ease-in-out',
           collapsed ? 'w-16' : 'w-64',
           // Mobile: fixed overlay, hidden by default
           'fixed z-50 lg:static',

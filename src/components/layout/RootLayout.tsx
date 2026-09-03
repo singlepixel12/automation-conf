@@ -11,7 +11,7 @@ export function RootLayout() {
   return (
     <div className="flex min-h-screen">
       {/* Wrapper stretches full content height so border-r never stops short */}
-      <div className="border-r shrink-0">
+      <div className="border-r border-sidebar-border shrink-0">
         <AppSidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
