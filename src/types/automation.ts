@@ -51,7 +51,7 @@ export const TYPE_LABELS: Record<AutomationType, string> = {
 
 export const STATUS_COLORS: Record<AutomationStatus, string> = {
   active: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-  inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-300',
+  inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-500 dark:text-gray-50',
   error: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
   draft: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
 };
