@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { Header } from './Header';
@@ -8,13 +8,17 @@ export function RootLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
+  const handleSidebarClose = useCallback(() => {
+    setSidebarOpen(false);
+  }, []);
+
   return (
     <div className="flex min-h-screen">
       {/* Wrapper stretches full content height so border-r never stops short */}
       <div className="border-r border-sidebar-border shrink-0">
         <AppSidebar
           open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
+          onClose={handleSidebarClose}
           collapsed={collapsed}
           onToggleCollapse={() => setCollapsed((c) => !c)}
         />
