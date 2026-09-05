@@ -92,7 +92,9 @@
   }
 }
 
-/* Spring-like dialog animation (overshoot) */
+/* Spring-like dialog animation (overshoot). The centring transform also lives on
+   the class itself so the animation can be dropped for reduced motion without
+   the dialog sliding off centre. */
 @keyframes dialog-spring-in {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
   60% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
@@ -101,6 +103,24 @@
 @keyframes dialog-spring-out {
   0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+}
+.dialog-surface {
+  transform: translate(-50%, -50%);
+}
+.dialog-surface[data-state='open'] {
+  animation: dialog-spring-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+.dialog-surface[data-state='closed'] {
+  animation: dialog-spring-out 0.2s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-surface[data-state='open'],
+  .dialog-surface[data-state='closed'],
+  .dialog-overlay[data-state='open'],
+  .dialog-overlay[data-state='closed'] {
+    animation: none;
+  }
 }
 
 /* AG Grid theme overrides - light */
