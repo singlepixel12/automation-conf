@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAutomationStore } from '@/stores/automationStore';
 import { StatCard } from '@/components/dashboard/StatCard';
@@ -20,7 +19,6 @@ const fadeUp = {
 
 export function DashboardPage() {
   const automations = useAutomationStore((s) => s.automations);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   const total = automations.length;
   const active = automations.filter((a) => a.status === 'active').length;
@@ -62,15 +60,13 @@ export function DashboardPage() {
       </motion.div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s, i) => (
+        {stats.map((s) => (
           <motion.div key={s.title} variants={fadeUp}>
             <StatCard
               title={s.title}
               value={s.value}
               icon={s.icon}
               variant={s.variant}
-              dimmed={hoveredCard !== null && hoveredCard !== i}
-              onHover={(h) => setHoveredCard(h ? i : null)}
             />
           </motion.div>
         ))}
