@@ -8,29 +8,20 @@ interface StatCardProps {
   value: number;
   icon: LucideIcon;
   variant?: 'default' | 'success' | 'error' | 'warning';
-  dimmed?: boolean;
-  onHover?: (hovering: boolean) => void;
 }
 
 const variantStyles = {
   default: 'text-primary',
-  success: 'text-emerald-600',
-  error: 'text-red-600',
-  warning: 'text-amber-600',
+  success: 'text-emerald-600 dark:text-emerald-400',
+  error: 'text-red-600 dark:text-red-400',
+  warning: 'text-amber-600 dark:text-amber-400',
 };
 
-export function StatCard({ title, value, icon: Icon, variant = 'default', dimmed, onHover }: StatCardProps) {
+export function StatCard({ title, value, icon: Icon, variant = 'default' }: StatCardProps) {
   const displayValue = useAnimatedCounter(value);
 
   return (
-    <Card
-      className={cn(
-        'transition-all duration-300 ease-out',
-        dimmed && 'blur-[2px] scale-[0.98] opacity-60'
-      )}
-      onMouseEnter={() => onHover?.(true)}
-      onMouseLeave={() => onHover?.(false)}
-    >
+    <Card>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
