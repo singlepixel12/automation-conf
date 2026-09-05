@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AutomationType } from '@/types/automation';
 import { Bot, Clock, Database, Globe, FolderSync } from 'lucide-react';
@@ -17,6 +17,8 @@ interface TypeBreakdownProps {
 }
 
 export function TypeBreakdown({ data, total }: TypeBreakdownProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <Card>
       <CardHeader>
@@ -40,13 +42,13 @@ export function TypeBreakdown({ data, total }: TypeBreakdownProps) {
               <div className="h-2 rounded-full bg-muted overflow-hidden">
                 <motion.div
                   className="h-full rounded-full bg-primary"
-                  initial={{ width: 0 }}
+                  initial={shouldReduceMotion ? false : { width: 0 }}
                   animate={{ width: `${pct}%` }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.3 + idx * 0.08,
-                    ease: [0.25, 0.1, 0.25, 1] as const,
-                  }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.25, delay: idx * 0.03, ease: [0.25, 0.1, 0.25, 1] as const }
+                  }
                 />
               </div>
             </div>
