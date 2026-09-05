@@ -30,17 +30,8 @@ import type { AutomationType, AutomationStatus, Environment } from '@/types/auto
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/lib/useToast';
-import { motion } from 'framer-motion';
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const } },
-};
+import { motion, useReducedMotion } from 'framer-motion';
+import { pageContainerVariants, pageItemVariants } from '@/lib/motion';
 
 export function ConfigDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,6 +40,7 @@ export function ConfigDetailPage() {
   const deleteAutomation = useAutomationStore((s) => s.deleteAutomation);
   const duplicateAutomation = useAutomationStore((s) => s.duplicateAutomation);
   const navigate = useNavigate();
+  const shouldReduceMotion = useReducedMotion();
 
   const [tagInput, setTagInput] = useState('');
   const [copied, setCopied] = useState(false);
@@ -117,11 +109,11 @@ export function ConfigDetailPage() {
   return (
     <motion.div
       className="space-y-6"
-      variants={stagger}
-      initial="hidden"
+      variants={pageContainerVariants}
+      initial={shouldReduceMotion ? false : 'hidden'}
       animate="show"
     >
-      <motion.div variants={fadeUp} className="flex items-center gap-4">
+      <motion.div variants={pageItemVariants} className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link to="/automations">
             <ArrowLeft className="h-4 w-4" />
@@ -198,7 +190,7 @@ export function ConfigDetailPage() {
         </AlertDialog>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="grid gap-4 md:grid-cols-5">
+      <motion.div variants={pageItemVariants} className="grid gap-4 md:grid-cols-5">
         <EditableSelectCard
           icon={Tag}
           label="Type"
@@ -233,7 +225,7 @@ export function ConfigDetailPage() {
         />
       </motion.div>
 
-      <motion.div variants={fadeUp} className="flex items-center gap-2 flex-wrap">
+      <motion.div variants={pageItemVariants} className="flex items-center gap-2 flex-wrap">
         {automation.tags.map((tag) => (
           <Badge key={tag} variant="secondary" className="gap-1 pr-1">
             {tag}
@@ -259,7 +251,7 @@ export function ConfigDetailPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={fadeUp}>
+      <motion.div variants={pageItemVariants}>
         <ApiEndpointBar
           automationId={automation.id}
           copied={copiedEndpoint}
@@ -271,7 +263,7 @@ export function ConfigDetailPage() {
         />
       </motion.div>
 
-      <motion.div variants={fadeUp}>
+      <motion.div variants={pageItemVariants}>
         <Tabs defaultValue="config">
           <TabsList>
             <TabsTrigger value="config">Configuration</TabsTrigger>
