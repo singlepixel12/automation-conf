@@ -1,8 +1,39 @@
 @import "tailwindcss";
 
+/* Self-hosted Inter (latin subset) - weights 400/500/600/700 only */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('@fontsource/inter/files/inter-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('@fontsource/inter/files/inter-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url('@fontsource/inter/files/inter-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url('@fontsource/inter/files/inter-latin-700-normal.woff2') format('woff2');
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --font-sans: 'Inter', system-ui, sans-serif;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -84,7 +115,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
     margin: 0;
   }
   #root {
@@ -108,7 +139,7 @@
   --ag-border-radius: 0.5rem;
   --ag-row-hover-color: oklch(0.965 0 0);
   --ag-selected-row-background-color: oklch(0.95 0.01 265);
-  --ag-font-family: system-ui, -apple-system, sans-serif;
+  --ag-font-family: var(--font-sans);
   --ag-font-size: 14px;
   --ag-header-background-color: oklch(0.985 0 0);
 }
