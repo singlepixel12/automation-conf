@@ -4,6 +4,7 @@ import { CalendarOff } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { EnvironmentBadge } from '@/components/automations/EnvironmentBadge';
 import { useAutomationStore } from '@/stores/automationStore';
 import { cn } from '@/lib/utils';
 import { STATUS_COLORS, TYPE_LABELS } from '@/types/automation';
@@ -143,7 +144,9 @@ export function SchedulingTable({ searchText }: SchedulingTableProps) {
                   </Badge>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">{TYPE_LABELS[a.type]}</td>
-                <td className="px-4 py-3 capitalize">{a.environment}</td>
+                <td className="px-4 py-3">
+                  <EnvironmentBadge environment={a.environment} />
+                </td>
               </tr>
             );
           })}

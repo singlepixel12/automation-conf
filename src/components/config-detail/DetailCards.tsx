@@ -36,7 +36,7 @@ export function EditableSelectCard({
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
-  displayValue: string;
+  displayValue: React.ReactNode;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
