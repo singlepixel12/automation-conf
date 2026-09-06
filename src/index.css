@@ -103,8 +103,22 @@
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
 }
 
-/* AG Grid theme overrides - light */
-.ag-theme-quartz {
+/*
+ * AG Grid theme overrides.
+ *
+ * The grid runs on the v35 Theming API (`theme={themeQuartz}`), so the legacy
+ * stylesheets are never imported and the old `.ag-theme-quartz` wrapper class
+ * did nothing on its own - it has been dropped for a project-specific class.
+ *
+ * Setting `--ag-*` on the element that directly contains the grid is still
+ * supported: the Theming API emits `--ag-inherited-<param>: var(--ag-<param>)`
+ * on that parent and reads it back inside the grid. That only works for names
+ * that map to a real v35 theme param, so the variables kept below are the ones
+ * verified to be live. Five legacy names that had no v35 equivalent were inert
+ * and have been removed: --ag-secondary-border-color, --ag-header-foreground-color,
+ * --ag-data-color, --ag-control-panel-background-color and --ag-input-border-color.
+ */
+.automations-grid {
   --ag-border-radius: 0.5rem;
   --ag-row-hover-color: oklch(0.965 0 0);
   --ag-selected-row-background-color: oklch(0.95 0.01 265);
@@ -113,18 +127,12 @@
   --ag-header-background-color: oklch(0.985 0 0);
 }
 
-/* AG Grid theme overrides - dark */
-.dark .ag-theme-quartz {
+.dark .automations-grid {
   --ag-background-color: oklch(0.17 0 0);
   --ag-foreground-color: oklch(0.985 0 0);
   --ag-header-background-color: oklch(0.2 0 0);
   --ag-row-hover-color: oklch(0.22 0 0);
   --ag-selected-row-background-color: oklch(0.25 0.01 265);
   --ag-border-color: oklch(0.3 0 0);
-  --ag-secondary-border-color: oklch(0.25 0 0);
-  --ag-header-foreground-color: oklch(0.9 0 0);
-  --ag-data-color: oklch(0.9 0 0);
   --ag-odd-row-background-color: oklch(0.155 0 0);
-  --ag-control-panel-background-color: oklch(0.17 0 0);
-  --ag-input-border-color: oklch(0.3 0 0);
 }
