@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { EnvironmentBadge } from './EnvironmentBadge';
 import { useAutomationStore } from '@/stores/automationStore';
 import { toast } from '@/lib/useToast';
 import { cn } from '@/lib/utils';
@@ -101,12 +102,20 @@ export function AddAutomationDialog({ open, onOpenChange }: AddAutomationDialogP
               <Label>Environment</Label>
               <Select value={environment} onValueChange={(v) => setEnvironment(v as Environment)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    <EnvironmentBadge environment={environment} />
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="development">Development</SelectItem>
-                  <SelectItem value="staging">Staging</SelectItem>
-                  <SelectItem value="production">Production</SelectItem>
+                  <SelectItem value="development">
+                    <EnvironmentBadge environment="development" />
+                  </SelectItem>
+                  <SelectItem value="staging">
+                    <EnvironmentBadge environment="staging" />
+                  </SelectItem>
+                  <SelectItem value="production">
+                    <EnvironmentBadge environment="production" />
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
