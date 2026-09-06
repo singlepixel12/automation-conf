@@ -5,12 +5,17 @@ import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-communi
 import type { ColDef, RowClickedEvent, CellValueChangedEvent, FilterChangedEvent, ICellRendererParams } from 'ag-grid-community';
 import { useAutomationStore } from '@/stores/automationStore';
 import { StatusBadge } from './StatusBadge';
+import { EnvironmentBadge } from './EnvironmentBadge';
 import { TYPE_LABELS } from '@/types/automation';
-import type { Automation } from '@/types/automation';
+import type { Automation, Environment } from '@/types/automation';
 import { Trash2, SearchX } from 'lucide-react';
 import { toast } from '@/lib/useToast';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+function EnvironmentCell(params: ICellRendererParams<Automation>) {
+  return <EnvironmentBadge environment={params.value as Environment} />;
+}
 
 interface AutomationsGridProps {
   searchText: string;
@@ -79,7 +84,7 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
         flex: 1,
         minWidth: 120,
         filter: true,
-        cellClass: 'capitalize',
+        cellRenderer: EnvironmentCell,
       },
       {
         field: 'owner',
