@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAutomationStore } from '@/stores/automationStore';
 import { ConfigEditor } from '@/components/config-editor/ConfigEditor';
 import { MetaItem, EditableSelectCard, EditableTextCard, ApiEndpointBar } from '@/components/config-detail/DetailCards';
+import { EnvironmentBadge } from '@/components/automations/EnvironmentBadge';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -211,7 +212,7 @@ export function ConfigDetailPage() {
           icon={Globe}
           label="Environment"
           value={automation.environment}
-          displayValue={automation.environment}
+          displayValue={<EnvironmentBadge environment={automation.environment} />}
           onChange={(v) => updateAutomation(automation.id, { environment: v as Environment })}
           options={[
             { value: 'development', label: 'Development' },
