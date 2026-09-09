@@ -34,10 +34,22 @@
   src: url('../node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2') format('woff2');
 }
 
+/* Self-hosted JetBrains Mono (latin subset) - regular 400 only, which is the
+   single weight every `font-mono` call site asks for. Same relative-url reason
+   as the Inter faces above. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --app-font-family: 'Inter', system-ui, sans-serif;
+  --app-mono-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -85,6 +97,9 @@
 }
 
 @theme inline {
+  /* One token drives every `font-mono` utility, so machine data picks up the
+     self-hosted face without touching the individual call sites. */
+  --font-mono: var(--app-mono-family);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
