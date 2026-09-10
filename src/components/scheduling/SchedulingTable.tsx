@@ -1,4 +1,5 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, type CSSProperties } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { CalendarOff } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -12,6 +13,11 @@ import type { Automation } from '@/types/automation';
 
 interface SchedulingTableProps {
   searchText: string;
+}
+
+interface DispatchEffect {
+  generation: number;
+  distance: number;
 }
 
 function matchesSearch(a: Automation, q: string) {
@@ -78,6 +84,123 @@ function CronCell({
   );
 }
 
+function SchedulingRow({
+  automation: a,
+  updateAutomation,
+  setStatus,
+}: {
+  automation: Automation;
+  updateAutomation: (id: string, updates: Partial<Automation>) => void;
+  setStatus: (id: string, status: Automation['status']) => void;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const switchRef = useRef<HTMLButtonElement>(null);
+  const statusAnchorRef = useRef<HTMLDivElement>(null);
+  const generationRef = useRef(0);
+  const [dispatch, setDispatch] = useState<DispatchEffect | null>(null);
+  const isEnabled = a.status === 'active';
+  const showDispatch = dispatch !== null && isEnabled && shouldReduceMotion === false;
+
+  useEffect(() => {
+    if (!isEnabled || shouldReduceMotion) {
+      generationRef.current += 1;
+      // This state mirrors external status/motion changes so stale decorative
+      // effects cannot survive Disable All or a preference change.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDispatch(null);
+    }
+  }, [isEnabled, shouldReduceMotion]);
+
+  const handleStatusChange = (checked: boolean) => {
+    if (checked && !isEnabled) {
+      const generation = generationRef.current + 1;
+      generationRef.current = generation;
+
+      if (shouldReduceMotion === false) {
+        const switchRect = switchRef.current?.getBoundingClientRect();
+        const statusRect = statusAnchorRef.current?.getBoundingClientRect();
+
+        if (switchRect && statusRect) {
+          const switchCenter = switchRect.left + switchRect.width / 2;
+          const statusCenter = statusRect.left + statusRect.width / 2;
+          const distance = statusCenter - switchCenter;
+
+          setDispatch(distance > 0 ? { generation, distance } : null);
+        } else {
+          setDispatch(null);
+        }
+      } else {
+        setDispatch(null);
+      }
+    } else if (!checked) {
+      generationRef.current += 1;
+      setDispatch(null);
+    }
+
+    setStatus(a.id, checked ? 'active' : 'inactive');
+  };
+
+  return (
+    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+      <td className="px-4 py-3 font-medium whitespace-nowrap">
+        <Link
+          to={`/automations/${a.id}`}
+          className="text-primary hover:underline"
+        >
+          {a.name}
+        </Link>
+      </td>
+      <td className="px-4 py-3">
+        <Switch
+          ref={switchRef}
+          checked={isEnabled}
+          onCheckedChange={handleStatusChange}
+        />
+      </td>
+      <td className="px-4 py-3">
+        <CronCell
+          value={a.cronExpression}
+          onChange={(v) => updateAutomation(a.id, { cronExpression: v })}
+        />
+      </td>
+      <td className="px-4 py-3">
+        <div ref={statusAnchorRef} className="relative inline-flex items-center">
+          {showDispatch && (
+            <span
+              key={dispatch.generation}
+              className="scheduling-dispatch-track"
+              style={{ '--dispatch-distance': `${dispatch.distance}px` } as CSSProperties}
+              aria-hidden="true"
+            >
+              <span
+                className="scheduling-dispatch-streak"
+                onAnimationEnd={() => {
+                  setDispatch((current) =>
+                    current?.generation === dispatch.generation ? null : current,
+                  );
+                }}
+              />
+            </span>
+          )}
+          {showDispatch && (
+            <span
+              className="scheduling-dispatch-impact"
+              aria-hidden="true"
+            />
+          )}
+          <Badge className={cn('relative z-10 border-0', STATUS_COLORS[a.status])}>
+            {a.status}
+          </Badge>
+        </div>
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap">{TYPE_LABELS[a.type]}</td>
+      <td className="px-4 py-3">
+        <EnvironmentBadge environment={a.environment} />
+      </td>
+    </tr>
+  );
+}
+
 export function SchedulingTable({ searchText }: SchedulingTableProps) {
   const automations = useAutomationStore((s) => s.automations);
   const updateAutomation = useAutomationStore((s) => s.updateAutomation);
@@ -111,45 +234,14 @@ export function SchedulingTable({ searchText }: SchedulingTableProps) {
           </tr>
         </thead>
         <tbody>
-          {filtered.map((a) => {
-            const isEnabled = a.status === 'active';
-
-            return (
-              <tr key={a.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3 font-medium whitespace-nowrap">
-                  <Link
-                    to={`/automations/${a.id}`}
-                    className="text-primary hover:underline"
-                  >
-                    {a.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  <Switch
-                    checked={isEnabled}
-                    onCheckedChange={(checked) =>
-                      setStatus(a.id, checked ? 'active' : 'inactive')
-                    }
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  <CronCell
-                    value={a.cronExpression}
-                    onChange={(v) => updateAutomation(a.id, { cronExpression: v })}
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  <Badge className={cn('border-0', STATUS_COLORS[a.status])}>
-                    {a.status}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">{TYPE_LABELS[a.type]}</td>
-                <td className="px-4 py-3">
-                  <EnvironmentBadge environment={a.environment} />
-                </td>
-              </tr>
-            );
-          })}
+          {filtered.map((a) => (
+            <SchedulingRow
+              key={a.id}
+              automation={a}
+              updateAutomation={updateAutomation}
+              setStatus={setStatus}
+            />
+          ))}
         </tbody>
       </table>
     </div>

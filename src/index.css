@@ -171,6 +171,88 @@
   .dialog-overlay[data-state='closed'] {
     animation: none;
   }
+
+  .scheduling-dispatch-track,
+  .scheduling-dispatch-streak,
+  .scheduling-dispatch-impact {
+    display: none;
+    animation: none;
+  }
+}
+
+@keyframes scheduling-dispatch-streak {
+  0% {
+    opacity: 0;
+    transform: translate(-100%, -50%) scaleX(0.7);
+  }
+  12% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dispatch-distance) - 100%), -50%) scaleX(0.9);
+  }
+}
+
+@keyframes scheduling-dispatch-impact {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.55);
+  }
+  30% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+.scheduling-dispatch-track {
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  width: var(--dispatch-distance);
+  height: 2px;
+  overflow: visible;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--primary) 28%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scheduling-dispatch-streak {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.5rem;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, var(--primary-foreground), var(--primary));
+  box-shadow: 0 0 8px color-mix(in oklch, var(--primary) 65%, transparent);
+  pointer-events: none;
+  animation: scheduling-dispatch-streak 0.62s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.scheduling-dispatch-impact {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3rem;
+  height: 1.75rem;
+  border: 2px solid var(--primary);
+  border-radius: 9999px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  animation: scheduling-dispatch-impact 0.26s 0.34s ease-out forwards;
+}
+
+.dark .scheduling-dispatch-track {
+  background: color-mix(in oklch, var(--primary) 38%, transparent);
 }
 
 /*
