@@ -51,14 +51,19 @@ export function DashboardPage() {
         <p className="text-muted-foreground">Overview of all automation configurations.</p>
       </motion.div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
         {stats.map((s) => (
-          <motion.div key={s.title} variants={pageItemVariants}>
+          <motion.div
+            key={s.title}
+            className={s.title === 'Total Automations' ? 'h-full lg:col-span-2' : 'h-full'}
+            variants={pageItemVariants}
+          >
             <StatCard
               title={s.title}
               value={s.value}
               icon={s.icon}
               variant={s.variant}
+              prominence={s.title === 'Total Automations' ? 'primary' : 'supporting'}
             />
           </motion.div>
         ))}
