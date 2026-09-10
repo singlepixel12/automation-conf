@@ -1,5 +1,17 @@
 # Future Enhancements
 
+## Implemented Foundations
+
+### Typography Roles
+The UI runs on two self-hosted typefaces, each with a defined job:
+
+- **Inter (body)** — all prose: names, owners, descriptions, tags, type labels, headings and controls. Wired through `--app-font-family`, applied on `body` and to the AG Grid via `--ag-font-family`.
+- **JetBrains Mono (machine data)** — anything meant to be read character by character: IDs, CRON expressions, versions, config keys and values, and raw JSON. Wired through `--app-mono-family`, mapped onto Tailwind's `--font-mono` theme token so every `font-mono` utility picks it up centrally rather than per call site.
+
+Both are bundled from `@fontsource` with the latin subset only, and only the weights actually in use (Inter 400/500/600/700, JetBrains Mono 400). They load with `font-display: optional` so a slow font fetch never reflows the page.
+
+---
+
 ## Phase 1 — Foundation (Backend + Auth)
 
 ### Supabase Backend

@@ -163,6 +163,7 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
         headerName: 'Version',
         flex: 0.5,
         minWidth: 80,
+        cellClass: 'font-mono',
         hide: tier === 'narrow',
       },
       {
