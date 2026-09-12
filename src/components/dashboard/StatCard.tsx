@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useAnimatedCounter } from '@/lib/useAnimatedCounter';
+import { ERROR_PRESENTATION } from '@/types/automation';
 import type { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -23,8 +24,8 @@ const variantStyles = {
     surface: '',
   },
   error: {
-    value: 'text-red-600 dark:text-red-400',
-    icon: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+    value: ERROR_PRESENTATION.statValue,
+    icon: ERROR_PRESENTATION.badge,
     surface: 'border-red-300 bg-red-50/60 dark:border-red-800 dark:bg-red-950/30',
   },
   warning: {
