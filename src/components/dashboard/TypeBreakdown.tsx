@@ -24,36 +24,37 @@ export function TypeBreakdown({ data, total }: TypeBreakdownProps) {
       <CardHeader>
         <CardTitle className="text-base">By Type</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {data.map(({ type, label, count }, idx) => {
-          const Icon = typeIcons[type];
-          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-          return (
-            <div key={type} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                  <span>{label}</span>
+      <CardContent>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {data.map(({ type, label, count }, idx) => {
+            const Icon = typeIcons[type];
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            return (
+              <motion.li
+                key={type}
+                className="rounded-lg border bg-muted/30 p-3"
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.15, delay: idx * 0.03, ease: [0.25, 0.1, 0.25, 1] as const }
+                }
+              >
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{label}</span>
                 </div>
-                <span className="text-muted-foreground">
-                  {count} ({pct}%)
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full bg-primary"
-                  initial={shouldReduceMotion ? false : { width: 0 }}
-                  animate={{ width: `${pct}%` }}
-                  transition={
-                    shouldReduceMotion
-                      ? { duration: 0 }
-                      : { duration: 0.25, delay: idx * 0.03, ease: [0.25, 0.1, 0.25, 1] as const }
-                  }
-                />
-              </div>
-            </div>
-          );
-        })}
+                <div className="mt-2 flex items-baseline justify-between gap-2">
+                  <span className="text-2xl font-semibold tabular-nums">{count}</span>
+                  <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                    {pct}%
+                  </span>
+                </div>
+              </motion.li>
+            );
+          })}
+        </ul>
       </CardContent>
     </Card>
   );

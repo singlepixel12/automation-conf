@@ -17,16 +17,18 @@ export function DashboardPage() {
   const errors = automations.filter((a) => a.status === 'error').length;
   const drafts = automations.filter((a) => a.status === 'draft').length;
 
-  const byType = Object.entries(
-    automations.reduce<Record<string, number>>((acc, a) => {
-      acc[a.type] = (acc[a.type] || 0) + 1;
-      return acc;
-    }, {})
-  ).map(([type, count]) => ({
-    type: type as AutomationType,
-    label: TYPE_LABELS[type as AutomationType],
-    count,
-  }));
+  const typeCounts = automations.reduce<Partial<Record<AutomationType, number>>>((acc, automation) => {
+    acc[automation.type] = (acc[automation.type] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const byType = (Object.entries(TYPE_LABELS) as [AutomationType, string][]).map(
+    ([type, label]) => ({
+      type,
+      label,
+      count: typeCounts[type] ?? 0,
+    })
+  );
 
   const recent = [...automations]
     .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
