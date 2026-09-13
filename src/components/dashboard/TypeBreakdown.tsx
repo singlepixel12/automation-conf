@@ -25,7 +25,7 @@ export function TypeBreakdown({ data, total }: TypeBreakdownProps) {
         <CardTitle className="text-base">By Type</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:[&>li:last-child:nth-child(odd)]:col-span-2">
           {data.map(({ type, label, count }, idx) => {
             const Icon = typeIcons[type];
             const pct = total > 0 ? Math.round((count / total) * 100) : 0;
