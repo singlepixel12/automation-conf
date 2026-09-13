@@ -49,10 +49,24 @@ export const TYPE_LABELS: Record<AutomationType, string> = {
   'file-transfer': 'File Transfer',
 };
 
+/**
+ * Error red, authored once. Both entries are complete literal Tailwind class
+ * strings so the scanner can discover them.
+ *
+ * `badge` is the compact role - status chips and the stat icon tile - where red
+ * sits as text on a red fill. `statValue` is the large-number role, where red is
+ * bare text on the card surface and takes the darker light-mode shade that suits
+ * display size. The two roles stay distinct; the shades within each are shared.
+ */
+export const ERROR_PRESENTATION = {
+  badge: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+  statValue: 'text-red-600 dark:text-red-400',
+} as const;
+
 export const STATUS_COLORS: Record<AutomationStatus, string> = {
   active: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
   inactive: 'bg-gray-100 text-gray-800 dark:bg-neutral-800 dark:text-gray-300',
-  error: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+  error: ERROR_PRESENTATION.badge,
   draft: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
 };
 
