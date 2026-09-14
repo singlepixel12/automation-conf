@@ -33,7 +33,7 @@ export function AutomationsPage() {
       <motion.div variants={pageItemVariants} className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search automations..."
+          placeholder="Filter automations..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           className="pl-9"
