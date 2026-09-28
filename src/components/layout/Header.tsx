@@ -1,14 +1,21 @@
 import { useLocation, Link } from 'react-router-dom';
-import { ChevronRight, Menu } from 'lucide-react';
+import { ChevronRight, Menu, Search } from 'lucide-react';
 import { useAutomationStore } from '@/stores/automationStore';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 
+/** Hint on the palette trigger. RootLayout accepts either modifier. */
+const SHORTCUT_HINT =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
+    ? '⌘K'
+    : 'Ctrl K';
+
 interface HeaderProps {
   onMenuClick: () => void;
+  onCommandPaletteOpen: () => void;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, onCommandPaletteOpen }: HeaderProps) {
   const location = useLocation();
   const automations = useAutomationStore((s) => s.automations);
 
@@ -41,7 +48,24 @@ export function Header({ onMenuClick }: HeaderProps) {
             ))}
           </nav>
         </div>
-        <ModeToggle />
+        <div className="flex items-center gap-2">
+          {/* Global navigation - jumps to any page or automation. Distinct from
+              the Automations page search box, which filters the grid in place. */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCommandPaletteOpen}
+            className="gap-2 text-muted-foreground"
+            aria-label="Go to a page or automation"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Go to...</span>
+            <kbd className="hidden rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium md:inline">
+              {SHORTCUT_HINT}
+            </kbd>
+          </Button>
+          <ModeToggle />
+        </div>
       </div>
     </header>
   );
