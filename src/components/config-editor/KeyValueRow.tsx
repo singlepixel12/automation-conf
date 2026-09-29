@@ -41,7 +41,14 @@ export function KeyValueRow({ automationId, sectionId, entry }: KeyValueRowProps
           onChange={handleValueChange}
         />
       </div>
-      <Badge variant="outline" className="text-[10px] shrink-0">
+      <Badge
+        variant="outline"
+        className={`text-[10px] shrink-0 ${
+          entry.type === 'secret'
+            ? 'font-bold ring-1 ring-foreground ring-offset-1 ring-offset-background'
+            : ''
+        }`}
+      >
         {entry.type}
       </Badge>
       {entry.type === 'secret' && (
