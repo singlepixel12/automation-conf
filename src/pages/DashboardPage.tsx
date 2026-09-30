@@ -34,11 +34,42 @@ export function DashboardPage() {
     .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
     .slice(0, 8);
 
+  // Total always links: the list is where new automations get added, even from
+  // zero. The status cards only link when there is something to inspect, so a
+  // zero (notably zero errors) stays a calm, static summary.
   const stats = [
-    { title: 'Total Automations', value: total, icon: Bot, variant: 'default' as const },
-    { title: 'Active', value: active, icon: CheckCircle, variant: 'success' as const },
-    { title: 'Errors', value: errors, icon: AlertTriangle, variant: 'error' as const },
-    { title: 'Drafts', value: drafts, icon: FileText, variant: 'warning' as const },
+    {
+      title: 'Total Automations',
+      value: total,
+      icon: Bot,
+      variant: 'default' as const,
+      to: '/automations',
+      actionLabel: 'View all automations',
+    },
+    {
+      title: 'Active',
+      value: active,
+      icon: CheckCircle,
+      variant: 'success' as const,
+      to: active > 0 ? '/automations?status=active' : undefined,
+      actionLabel: 'View active automations',
+    },
+    {
+      title: 'Errors',
+      value: errors,
+      icon: AlertTriangle,
+      variant: 'error' as const,
+      to: errors > 0 ? '/automations?status=error' : undefined,
+      actionLabel: 'View automations with errors',
+    },
+    {
+      title: 'Drafts',
+      value: drafts,
+      icon: FileText,
+      variant: 'warning' as const,
+      to: drafts > 0 ? '/automations?status=draft' : undefined,
+      actionLabel: 'View draft automations',
+    },
   ];
 
   return (
@@ -66,6 +97,8 @@ export function DashboardPage() {
               icon={s.icon}
               variant={s.variant}
               prominence={s.title === 'Total Automations' ? 'primary' : 'supporting'}
+              to={s.to}
+              actionLabel={s.actionLabel}
             />
           </motion.div>
         ))}
