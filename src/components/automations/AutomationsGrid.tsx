@@ -2,12 +2,23 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
-import type { ColDef, RowClickedEvent, CellValueChangedEvent, FilterChangedEvent, ICellRendererParams } from 'ag-grid-community';
+import type {
+  ColDef,
+  RowClickedEvent,
+  CellValueChangedEvent,
+  FilterChangedEvent,
+  GridApi,
+  GridState,
+  ICellRendererParams,
+  ModelUpdatedEvent,
+  TextFilterModel,
+} from 'ag-grid-community';
 import { useAutomationStore } from '@/stores/automationStore';
 import { StatusBadge } from './StatusBadge';
 import { EnvironmentBadge } from './EnvironmentBadge';
-import { TYPE_LABELS } from '@/types/automation';
-import type { Automation, Environment } from '@/types/automation';
+import { TYPE_LABELS, parseStatusFilterPreset } from '@/types/automation';
+import type { Automation, Environment, StatusFilterPreset } from '@/types/automation';
+import { Button } from '@/components/ui/button';
 import { Trash2, SearchX } from 'lucide-react';
 import { toast } from '@/lib/useToast';
 
@@ -30,23 +41,68 @@ function tierForWidth(width: number): WidthTier {
   return 'narrow';
 }
 
+/**
+ * A status preset is applied as the Status column's own filter (exact match),
+ * so rowData stays the full list and the user can see and clear it in the grid.
+ */
+function statusFilterModel(status: StatusFilterPreset): TextFilterModel {
+  return { filterType: 'text', type: 'equals', filter: status };
+}
+
+/** The preset the Status column filter currently expresses, if any. */
+function presetFromGrid(api: GridApi<Automation>): StatusFilterPreset | null {
+  const model = api.getColumnFilterModel<TextFilterModel>('status');
+  if (!model || model.type !== 'equals') return null;
+  // The text filter matches case-insensitively, so "Inactive" is still a preset.
+  return parseStatusFilterPreset(model.filter?.toLowerCase());
+}
+
+const STATUS_EMPTY_COPY: Record<StatusFilterPreset, string> = {
+  active: 'active automations',
+  inactive: 'inactive automations',
+  error: 'automations with errors',
+  draft: 'draft automations',
+};
+
 function EnvironmentCell(params: ICellRendererParams<Automation>) {
   return <EnvironmentBadge environment={params.value as Environment} />;
 }
 
 interface AutomationsGridProps {
   searchText: string;
+  statusFilter: StatusFilterPreset | null;
+  onStatusFilterChange: (status: StatusFilterPreset | null) => void;
+  /** Clears the filters owned outside the grid: the search text and status preset. */
+  onClearFilters: () => void;
 }
 
-export function AutomationsGrid({ searchText }: AutomationsGridProps) {
+export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange, onClearFilters }: AutomationsGridProps) {
   const automations = useAutomationStore((s) => s.automations);
   const updateAutomation = useAutomationStore((s) => s.updateAutomation);
   const deleteAutomation = useAutomationStore((s) => s.deleteAutomation);
   const navigate = useNavigate();
   const gridRef = useRef<AgGridReact<Automation>>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showEmpty, setShowEmpty] = useState(false);
+  const [hasNoRows, setHasNoRows] = useState(false);
+  // Column ids with an active filter, joined so unchanged sets don't re-render.
+  const [columnFilterIds, setColumnFilterIds] = useState('');
   const [tier, setTier] = useState<WidthTier>('medium');
+
+  // Seed the grid with the preset from the URL so the first render is already
+  // filtered; later URL changes are pushed in through the grid API below.
+  const [initialState] = useState<GridState | undefined>(() =>
+    statusFilter ? { filter: { filterModel: { status: statusFilterModel(statusFilter) } } } : undefined
+  );
+
+  // Keep the grid in step with the URL, including back/forward navigation.
+  useEffect(() => {
+    const api = gridRef.current?.api;
+    if (!api || api.isDestroyed()) return;
+    if (presetFromGrid(api) === statusFilter) return;
+    void api
+      .setColumnFilterModel('status', statusFilter ? statusFilterModel(statusFilter) : null)
+      .then(() => api.onFilterChanged());
+  }, [statusFilter]);
 
   // Storing the tier rather than the raw width means React bails out of
   // re-rendering unless a threshold is actually crossed, so the sidebar's width
@@ -225,13 +281,34 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
     [updateAutomation]
   );
 
+  // Reflect the user's own Status filter edits back into the URL. Changes the
+  // grid makes through the API (from the URL) are skipped to avoid a loop.
   const onFilterChanged = useCallback(
-    (event: FilterChangedEvent) => {
-      const count = event.api.getDisplayedRowCount();
-      setShowEmpty(count === 0 && searchText.length > 0);
+    (event: FilterChangedEvent<Automation>) => {
+      if (event.source === 'api' || event.source === 'quickFilter') return;
+      const preset = presetFromGrid(event.api);
+      if (preset !== statusFilter) onStatusFilterChange(preset);
     },
-    [searchText]
+    [statusFilter, onStatusFilterChange]
   );
+
+  const onModelUpdated = useCallback((event: ModelUpdatedEvent<Automation>) => {
+    setHasNoRows(event.api.getDisplayedRowCount() === 0);
+    setColumnFilterIds(Object.keys(event.api.getFilterModel()).sort().join(','));
+  }, []);
+
+  const clearAllFilters = useCallback(() => {
+    const api = gridRef.current?.api;
+    if (api && !api.isDestroyed()) api.setFilterModel(null);
+    onClearFilters();
+  }, [onClearFilters]);
+
+  const hasFilters = searchText.length > 0 || statusFilter !== null || columnFilterIds !== '';
+  const showEmpty = hasNoRows && hasFilters;
+  // Status-specific copy only when the preset is the one thing narrowing the list;
+  // otherwise it would blame the status for rows another filter removed.
+  const statusOnly = statusFilter !== null && searchText.length === 0 && columnFilterIds === 'status';
+  const searchOnly = searchText.length > 0 && statusFilter === null && columnFilterIds === '';
 
   return (
     <div className="relative">
@@ -252,6 +329,8 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
           onRowClicked={onRowClicked}
           onCellValueChanged={onCellValueChanged}
           onFilterChanged={onFilterChanged}
+          onModelUpdated={onModelUpdated}
+          initialState={initialState}
           getRowId={(params) => params.data.id}
           animateRows={true}
         />
@@ -259,7 +338,16 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
       {showEmpty && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 pointer-events-none">
           <SearchX className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
-          <p className="text-sm text-muted-foreground">No automations match your search.</p>
+          <p className="text-sm text-muted-foreground">
+            {statusOnly && statusFilter
+              ? `No ${STATUS_EMPTY_COPY[statusFilter]} right now.`
+              : searchOnly
+                ? 'No automations match your search.'
+                : 'No automations match the current filters.'}
+          </p>
+          <Button variant="outline" size="sm" className="pointer-events-auto mt-3" onClick={clearAllFilters}>
+            {statusOnly ? 'Clear status filter' : searchOnly ? 'Clear search' : 'Clear all filters'}
+          </Button>
         </div>
       )}
     </div>

@@ -71,6 +71,18 @@ export const STATUS_COLORS: Record<AutomationStatus, string> = {
 };
 
 /**
+ * Statuses the automations list can be pre-filtered to via `?status=`. Every
+ * status is accepted so a Status column filter set in the grid round-trips
+ * through the URL; anything else in the query is treated as no preset.
+ */
+export const STATUS_FILTER_PRESETS = ['active', 'inactive', 'error', 'draft'] as const satisfies readonly AutomationStatus[];
+export type StatusFilterPreset = (typeof STATUS_FILTER_PRESETS)[number];
+
+export function parseStatusFilterPreset(value: unknown): StatusFilterPreset | null {
+  return (STATUS_FILTER_PRESETS as readonly unknown[]).includes(value) ? (value as StatusFilterPreset) : null;
+}
+
+/**
  * Environment presentation. Production is deliberately violet so it can never be
  * mistaken for the red `error` status, and every variant pairs an opaque border
  * with its fill so the chip silhouette stays visible on the dark background.
