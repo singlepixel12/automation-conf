@@ -72,7 +72,17 @@ export function ConfigDetailPage() {
     updateAutomation(automation.id, { tags: automation.tags.filter((t) => t !== tag) });
   };
 
-  const jsonOutput = JSON.stringify(automation, null, 2);
+  // Mask secret values in the JSON view/copy for UI consistency with the editor (not a security boundary).
+  const redactedAutomation = {
+    ...automation,
+    config: automation.config.map((section) => ({
+      ...section,
+      entries: section.entries.map((entry) =>
+        entry.type === 'secret' ? { ...entry, value: '[REDACTED]' } : { ...entry }
+      ),
+    })),
+  };
+  const jsonOutput = JSON.stringify(redactedAutomation, null, 2);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(jsonOutput);
