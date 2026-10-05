@@ -581,4 +581,33 @@ export const mockAutomations: Automation[] = [
       },
     ],
   },
+  {
+    id: 'auto-019',
+    name: 'Warehouse Inventory Sync',
+    type: 'data-pipeline',
+    status: 'active',
+    environment: 'staging',
+    owner: 'Priya Patel',
+    description: 'Syncs warehouse stock levels into the inventory data mart each night.',
+    lastModified: timestampBeforeAnchor(5 * HOUR),
+    createdAt: timestampBeforeAnchor(45 * DAY),
+    version: '1.2.0',
+    tags: ['inventory', 'warehouse', 'nightly'],
+    config: [
+      {
+        id: 'cs-034',
+        name: 'Sync Settings',
+        entries: [
+          { id: 'ce-093', key: 'warehouse_id', value: '3f8a2c1e-7b4d-4e9a-9c6f-2d1b8e5a7c30', type: 'uuid', description: 'Source warehouse identifier', required: true },
+          { id: 'ce-094', key: 'max_rows_per_batch', value: 5000000, type: 'int8', required: true },
+          { id: 'ce-095', key: 'variance_tolerance_pct', value: 0.75, type: 'float8', description: 'Allowed stock variance before flagging', required: false },
+          { id: 'ce-096', key: 'backfill_start_date', value: '2026-01-01', type: 'date', required: false },
+          { id: 'ce-097', key: 'nightly_run_time', value: '02:30', type: 'time', required: true },
+          { id: 'ce-098', key: 'last_full_sync', value: '2026-09-28T02:30', type: 'timestamp', required: false },
+          { id: 'ce-099', key: 'maintenance_window_start', value: '2026-10-04T22:00', type: 'timestamptz', required: false },
+          { id: 'ce-100', key: 'field_mapping', value: '{"sku":"item_code","qty":"on_hand","bin":"location"}', type: 'jsonb', required: true },
+        ],
+      },
+    ],
+  },
 ];
