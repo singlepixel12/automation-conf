@@ -18,7 +18,6 @@ import { StatusBadge } from './StatusBadge';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { TYPE_LABELS, parseStatusFilterPreset } from '@/types/automation';
 import type { Automation, Environment, StatusFilterPreset } from '@/types/automation';
-import { Button } from '@/components/ui/button';
 import { Trash2, SearchX } from 'lucide-react';
 import { toast } from '@/lib/useToast';
 
@@ -57,13 +56,6 @@ function presetFromGrid(api: GridApi<Automation>): StatusFilterPreset | null {
   return parseStatusFilterPreset(model.filter?.toLowerCase());
 }
 
-const STATUS_EMPTY_COPY: Record<StatusFilterPreset, string> = {
-  active: 'active automations',
-  inactive: 'inactive automations',
-  error: 'automations with errors',
-  draft: 'draft automations',
-};
-
 function EnvironmentCell(params: ICellRendererParams<Automation>) {
   return <EnvironmentBadge environment={params.value as Environment} />;
 }
@@ -72,20 +64,16 @@ interface AutomationsGridProps {
   searchText: string;
   statusFilter: StatusFilterPreset | null;
   onStatusFilterChange: (status: StatusFilterPreset | null) => void;
-  /** Clears the filters owned outside the grid: the search text and status preset. */
-  onClearFilters: () => void;
 }
 
-export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange, onClearFilters }: AutomationsGridProps) {
+export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange }: AutomationsGridProps) {
   const automations = useAutomationStore((s) => s.automations);
   const updateAutomation = useAutomationStore((s) => s.updateAutomation);
   const deleteAutomation = useAutomationStore((s) => s.deleteAutomation);
   const navigate = useNavigate();
   const gridRef = useRef<AgGridReact<Automation>>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [hasNoRows, setHasNoRows] = useState(false);
-  // Column ids with an active filter, joined so unchanged sets don't re-render.
-  const [columnFilterIds, setColumnFilterIds] = useState('');
+  const [showEmpty, setShowEmpty] = useState(false);
   const [tier, setTier] = useState<WidthTier>('medium');
 
   // Seed the grid with the preset from the URL so the first render is already
@@ -292,23 +280,13 @@ export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange
     [statusFilter, onStatusFilterChange]
   );
 
-  const onModelUpdated = useCallback((event: ModelUpdatedEvent<Automation>) => {
-    setHasNoRows(event.api.getDisplayedRowCount() === 0);
-    setColumnFilterIds(Object.keys(event.api.getFilterModel()).sort().join(','));
-  }, []);
-
-  const clearAllFilters = useCallback(() => {
-    const api = gridRef.current?.api;
-    if (api && !api.isDestroyed()) api.setFilterModel(null);
-    onClearFilters();
-  }, [onClearFilters]);
-
-  const hasFilters = searchText.length > 0 || statusFilter !== null || columnFilterIds !== '';
-  const showEmpty = hasNoRows && hasFilters;
-  // Status-specific copy only when the preset is the one thing narrowing the list;
-  // otherwise it would blame the status for rows another filter removed.
-  const statusOnly = statusFilter !== null && searchText.length === 0 && columnFilterIds === 'status';
-  const searchOnly = searchText.length > 0 && statusFilter === null && columnFilterIds === '';
+  const onModelUpdated = useCallback(
+    (event: ModelUpdatedEvent<Automation>) => {
+      const count = event.api.getDisplayedRowCount();
+      setShowEmpty(count === 0 && searchText.length > 0);
+    },
+    [searchText]
+  );
 
   return (
     <div className="relative">
@@ -338,16 +316,7 @@ export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange
       {showEmpty && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 pointer-events-none">
           <SearchX className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
-          <p className="text-sm text-muted-foreground">
-            {statusOnly && statusFilter
-              ? `No ${STATUS_EMPTY_COPY[statusFilter]} right now.`
-              : searchOnly
-                ? 'No automations match your search.'
-                : 'No automations match the current filters.'}
-          </p>
-          <Button variant="outline" size="sm" className="pointer-events-auto mt-3" onClick={clearAllFilters}>
-            {statusOnly ? 'Clear status filter' : searchOnly ? 'Clear search' : 'Clear all filters'}
-          </Button>
+          <p className="text-sm text-muted-foreground">No automations match your search.</p>
         </div>
       )}
     </div>

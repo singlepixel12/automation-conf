@@ -21,25 +21,15 @@ export function AutomationsPage() {
 
   const setStatusFilter = useCallback(
     (status: StatusFilterPreset | null) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (status) next.set('status', status);
-          else next.delete('status');
-          return next;
-        },
-        { replace: true }
-      );
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (status) next.set('status', status);
+        else next.delete('status');
+        return next;
+      });
     },
     [setSearchParams]
   );
-
-  // The grid clears its own column filters; this clears the search box and the
-  // `?status=` preset that live here.
-  const clearFilters = useCallback(() => {
-    setSearchText('');
-    setStatusFilter(null);
-  }, [setStatusFilter]);
 
   return (
     <motion.div
@@ -74,7 +64,6 @@ export function AutomationsPage() {
           searchText={searchText}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
-          onClearFilters={clearFilters}
         />
       </motion.div>
 
