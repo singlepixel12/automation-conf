@@ -64,6 +64,8 @@ export function AutomationsPage() {
           searchText={searchText}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
+          onClearSearch={() => setSearchText('')}
+          onAddAutomation={() => setDialogOpen(true)}
         />
       </motion.div>
 
