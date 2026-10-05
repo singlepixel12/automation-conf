@@ -4,6 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Config Hub</title>
+    <script>
+      // Pre-hydration theme bootstrap. Keep in sync with src/components/theme-provider.tsx.
+      (function () {
+        var theme = "system";
+        try {
+          var stored = localStorage.getItem("config-hub-theme");
+          if (stored === "light" || stored === "dark" || stored === "system") theme = stored;
+        } catch (e) {}
+        var resolved = theme;
+        if (theme === "system") {
+          resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        var root = document.documentElement;
+        root.classList.remove("light", "dark");
+        root.classList.add(resolved);
+        root.style.colorScheme = resolved;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
