@@ -37,13 +37,14 @@ import { pageContainerVariants, pageItemVariants } from '@/lib/motion';
 type JsonValueTokenType = 'key' | 'string' | 'number' | 'boolean' | 'null';
 type JsonToken = { type: JsonValueTokenType | 'plain'; text: string };
 
+// Neutral grays so JSON tokens don't borrow the app's semantic color families (status, type, secret).
 // Explicit light/dark pairs; each meets WCAG AA (>= 4.5:1) against bg-muted in its theme.
 const JSON_TOKEN_CLASSES: Record<JsonValueTokenType, string> = {
-  key: 'text-sky-800 dark:text-sky-300',
-  string: 'text-emerald-800 dark:text-emerald-300',
-  number: 'text-amber-800 dark:text-amber-300',
-  boolean: 'text-blue-700 dark:text-blue-300',
-  null: 'text-slate-600 dark:text-slate-400',
+  key: 'text-[#262626] dark:text-[#fafafa]',
+  string: 'text-[#404040] dark:text-[#e5e5e5]',
+  number: 'text-[#525252] dark:text-[#d4d4d4]',
+  boolean: 'text-[#595959] dark:text-[#c7c7c7]',
+  null: 'text-[#666666] dark:text-[#b3b3b3]',
 };
 
 // Group order matches JSON_TOKEN_GROUPS. Strings honor escapes (\" and \\); a string followed by ":" is a key.
