@@ -41,7 +41,11 @@ export function AutomationsPage() {
       </motion.div>
 
       <motion.div variants={pageItemVariants}>
-        <AutomationsGrid searchText={searchText} />
+        <AutomationsGrid
+          searchText={searchText}
+          onClearSearch={() => setSearchText('')}
+          onAddAutomation={() => setDialogOpen(true)}
+        />
       </motion.div>
 
       <AddAutomationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
