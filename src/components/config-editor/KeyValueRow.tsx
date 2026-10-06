@@ -22,9 +22,11 @@ export function KeyValueRow({ automationId, sectionId, entry }: KeyValueRowProps
     updateConfigEntry(automationId, sectionId, entry.id, newValue);
   };
 
+  const isJsonb = entry.type === 'jsonb';
+
   return (
-    <div className="flex items-center gap-3 py-2 group">
-      <div className="w-48 shrink-0 overflow-hidden">
+    <div className={`flex ${isJsonb ? 'items-start' : 'items-center'} gap-3 py-2 group`}>
+      <div className={`w-48 shrink-0 overflow-hidden ${isJsonb ? 'pt-1.5' : ''}`}>
         <div className="flex items-center gap-2">
           <span className="text-sm font-mono truncate">{entry.key}</span>
           {entry.required && <span className="text-red-500 text-xs">*</span>}
@@ -43,7 +45,7 @@ export function KeyValueRow({ automationId, sectionId, entry }: KeyValueRowProps
       </div>
       <Badge
         variant="outline"
-        className={`text-[10px] shrink-0 ${
+        className={`text-[10px] shrink-0 ${isJsonb ? 'mt-1.5' : ''} ${
           entry.type === 'secret'
             ? 'font-bold ring-1 ring-foreground ring-offset-1 ring-offset-background'
             : ''
@@ -150,8 +152,7 @@ function ValueInput({
         <textarea
           value={value as string}
           onChange={(e) => onChange(e.target.value)}
-          className={`flex w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm font-mono min-h-[32px] max-h-[120px] resize-y ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none ${ringClass}`}
-          rows={1}
+          className={`flex w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm font-mono h-[120px] overflow-y-auto resize-none ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none ${ringClass}`}
         />
       );
     case 'secret':
