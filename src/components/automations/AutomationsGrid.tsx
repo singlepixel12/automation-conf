@@ -11,6 +11,7 @@ import type {
   GridState,
   ICellRendererParams,
   ModelUpdatedEvent,
+  OverlayType,
   TextFilterModel,
 } from 'ag-grid-community';
 import { useAutomationStore } from '@/stores/automationStore';
@@ -34,6 +35,14 @@ ModuleRegistry.registerModules([AllCommunityModule]);
  */
 const ALL_COLUMNS_MIN_WIDTH = 1180; // core columns + Version + Tags
 const VERSION_MIN_WIDTH = 980; // core columns + Version
+
+/**
+ * The empty and no-match states rendered alongside the grid replace AG Grid's
+ * generic overlays. noMatchingRows is shown automatically whenever filters
+ * leave zero rows, so it must be suppressed explicitly. Module-level so the
+ * grid receives a stable reference.
+ */
+const SUPPRESSED_OVERLAYS: OverlayType[] = ['noRows', 'noMatchingRows'];
 
 type WidthTier = 'wide' | 'medium' | 'narrow';
 
@@ -67,7 +76,8 @@ interface AutomationsGridProps {
   searchText: string;
   statusFilter: StatusFilterPreset | null;
   onStatusFilterChange: (status: StatusFilterPreset | null) => void;
-  onClearSearch: () => void;
+  /** Clears the page-owned filters: quick search and the URL status preset. */
+  onClearFilters: () => void;
   onAddAutomation: () => void;
   /** Always 'ready' for the in-memory store; see GridDataStatus. */
   dataStatus?: GridDataStatus;
@@ -85,7 +95,7 @@ export function AutomationsGrid({
   searchText,
   statusFilter,
   onStatusFilterChange,
-  onClearSearch,
+  onClearFilters,
   onAddAutomation,
   dataStatus = 'ready',
   onRetry,
@@ -333,10 +343,13 @@ export function AutomationsGrid({
     modelReady: model.ready,
   });
 
+  // The grid's own filter change is an API one, so onFilterChanged won't touch
+  // the URL; the page drops the status preset itself, and the URL effect then
+  // finds the grid already unfiltered.
   const clearFilters = useCallback(() => {
     gridRef.current?.api?.setFilterModel(null);
-    onClearSearch();
-  }, [onClearSearch]);
+    onClearFilters();
+  }, [onClearFilters]);
 
   return (
     <div className="relative">
@@ -369,8 +382,7 @@ export function AutomationsGrid({
           getRowId={(params) => params.data.id}
           animateRows={true}
           loading={displayState === 'loading'}
-          // The empty and no-match states below replace AG Grid's generic one.
-          suppressNoRowsOverlay={true}
+          suppressOverlays={SUPPRESSED_OVERLAYS}
         />
       </div>
       {/* The empty overlays let clicks through to the grid (header filter menus

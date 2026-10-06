@@ -39,3 +39,14 @@ export function getGridDisplayState({
   if (modelReady && displayedCount === 0 && hasActiveFilters) return 'filtered-empty';
   return 'rows';
 }
+
+/**
+ * The query with its `status` preset set or removed, leaving every other
+ * parameter as it was. Returns a copy; `params` is not mutated.
+ */
+export function withStatusParam(params: URLSearchParams, status: string | null): URLSearchParams {
+  const next = new URLSearchParams(params);
+  if (status) next.set('status', status);
+  else next.delete('status');
+  return next;
+}

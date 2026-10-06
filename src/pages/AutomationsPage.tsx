@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { pageContainerVariants, pageItemVariants } from '@/lib/motion';
 import { AutomationsGrid } from '@/components/automations/AutomationsGrid';
 import { AddAutomationDialog } from '@/components/automations/AddAutomationDialog';
+import { withStatusParam } from '@/components/automations/automationsGridState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
@@ -21,15 +22,17 @@ export function AutomationsPage() {
 
   const setStatusFilter = useCallback(
     (status: StatusFilterPreset | null) => {
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        if (status) next.set('status', status);
-        else next.delete('status');
-        return next;
-      });
+      setSearchParams((prev) => withStatusParam(prev, status));
     },
     [setSearchParams]
   );
+
+  // "Clear filters" resets the view in place rather than adding a history
+  // entry that Back would restore the filtered view from.
+  const clearFilters = useCallback(() => {
+    setSearchText('');
+    setSearchParams((prev) => withStatusParam(prev, null), { replace: true });
+  }, [setSearchParams]);
 
   return (
     <motion.div
@@ -64,7 +67,7 @@ export function AutomationsPage() {
           searchText={searchText}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
-          onClearSearch={() => setSearchText('')}
+          onClearFilters={clearFilters}
           onAddAutomation={() => setDialogOpen(true)}
         />
       </motion.div>

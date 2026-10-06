@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { getGridDisplayState, hasActiveGridFilters } from './automationsGridState.ts';
+import { getGridDisplayState, hasActiveGridFilters, withStatusParam } from './automationsGridState.ts';
 import type { GridDisplayInput } from './automationsGridState.ts';
 
 const ready: GridDisplayInput = {
@@ -69,4 +69,22 @@ test('quick search counts as a filter only when it has non-whitespace text', () 
 test('a column filter counts as a filter without quick search', () => {
   assert.equal(hasActiveGridFilters('', true), true);
   assert.equal(hasActiveGridFilters('etl', true), true);
+});
+
+test('clearing the status preset keeps unrelated query parameters', () => {
+  const prev = new URLSearchParams('status=error&view=compact&page=2');
+  const next = withStatusParam(prev, null);
+  assert.equal(next.toString(), 'view=compact&page=2');
+  // The current params are not mutated.
+  assert.equal(prev.get('status'), 'error');
+});
+
+test('clearing the only query parameter leaves an empty query', () => {
+  assert.equal(withStatusParam(new URLSearchParams('status=inactive'), null).toString(), '');
+});
+
+test('setting a status preset replaces any existing one', () => {
+  const next = withStatusParam(new URLSearchParams('status=error&view=compact'), 'inactive');
+  assert.equal(next.get('status'), 'inactive');
+  assert.equal(next.get('view'), 'compact');
 });
