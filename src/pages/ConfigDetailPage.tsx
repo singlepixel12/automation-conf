@@ -37,14 +37,18 @@ import { pageContainerVariants, pageItemVariants } from '@/lib/motion';
 type JsonValueTokenType = 'key' | 'string' | 'number' | 'boolean' | 'null';
 type JsonToken = { type: JsonValueTokenType | 'plain'; text: string };
 
-// Neutral grays so JSON tokens don't borrow the app's semantic color families (status, type, secret).
-// Explicit light/dark pairs; each meets WCAG AA (>= 4.5:1) against bg-muted in its theme.
+// Three achromatic layers so JSON tokens don't borrow the app's semantic color families (status, type, secret):
+// keys, scalar values, and punctuation/unmatched text (applied to the <pre>; keys and values override it).
+// Explicit light/dark pairs; each meets WCAG AA (>= 4.5:1) against bg-muted in its theme, and keys vs values >= 2:1.
+const JSON_KEY_CLASS = 'text-[oklch(0.25_0_0)] dark:text-[oklch(0.98_0_0)]';
+const JSON_VALUE_CLASS = 'text-[oklch(0.47_0_0)] dark:text-[oklch(0.73_0_0)]';
+const JSON_PUNCTUATION_CLASS = 'text-[oklch(0.54_0_0)] dark:text-[oklch(0.66_0_0)]';
 const JSON_TOKEN_CLASSES: Record<JsonValueTokenType, string> = {
-  key: 'text-[#262626] dark:text-[#fafafa]',
-  string: 'text-[#404040] dark:text-[#e5e5e5]',
-  number: 'text-[#525252] dark:text-[#d4d4d4]',
-  boolean: 'text-[#595959] dark:text-[#c7c7c7]',
-  null: 'text-[#666666] dark:text-[#b3b3b3]',
+  key: JSON_KEY_CLASS,
+  string: JSON_VALUE_CLASS,
+  number: JSON_VALUE_CLASS,
+  boolean: JSON_VALUE_CLASS,
+  null: JSON_VALUE_CLASS,
 };
 
 // Group order matches JSON_TOKEN_GROUPS. Strings honor escapes (\" and \\); a string followed by ":" is a key.
@@ -327,7 +331,12 @@ export function ConfigDetailPage() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <pre className="rounded-md bg-muted p-4 overflow-auto max-h-[600px] text-sm font-mono leading-relaxed">
+                <pre
+                  className={cn(
+                    'rounded-md bg-muted p-4 overflow-auto max-h-[600px] text-sm font-mono leading-relaxed',
+                    JSON_PUNCTUATION_CLASS
+                  )}
+                >
                   {tokenizeJson(jsonOutput).map((token, i) =>
                     token.type === 'plain' ? (
                       token.text
