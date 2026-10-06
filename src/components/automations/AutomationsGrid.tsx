@@ -2,12 +2,22 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
-import type { ColDef, RowClickedEvent, CellValueChangedEvent, FilterChangedEvent, ICellRendererParams } from 'ag-grid-community';
+import type {
+  ColDef,
+  RowClickedEvent,
+  CellValueChangedEvent,
+  FilterChangedEvent,
+  GridApi,
+  GridState,
+  ICellRendererParams,
+  ModelUpdatedEvent,
+  TextFilterModel,
+} from 'ag-grid-community';
 import { useAutomationStore } from '@/stores/automationStore';
 import { StatusBadge } from './StatusBadge';
 import { EnvironmentBadge } from './EnvironmentBadge';
-import { TYPE_LABELS } from '@/types/automation';
-import type { Automation, Environment } from '@/types/automation';
+import { TYPE_LABELS, parseStatusFilterPreset } from '@/types/automation';
+import type { Automation, Environment, StatusFilterPreset } from '@/types/automation';
 import { Trash2, SearchX } from 'lucide-react';
 import { toast } from '@/lib/useToast';
 
@@ -30,15 +40,33 @@ function tierForWidth(width: number): WidthTier {
   return 'narrow';
 }
 
+/**
+ * A status preset is applied as the Status column's own filter (exact match),
+ * so rowData stays the full list and the user can see and clear it in the grid.
+ */
+function statusFilterModel(status: StatusFilterPreset): TextFilterModel {
+  return { filterType: 'text', type: 'equals', filter: status };
+}
+
+/** The preset the Status column filter currently expresses, if any. */
+function presetFromGrid(api: GridApi<Automation>): StatusFilterPreset | null {
+  const model = api.getColumnFilterModel<TextFilterModel>('status');
+  if (!model || model.type !== 'equals') return null;
+  // The text filter matches case-insensitively, so "Inactive" is still a preset.
+  return parseStatusFilterPreset(model.filter?.toLowerCase());
+}
+
 function EnvironmentCell(params: ICellRendererParams<Automation>) {
   return <EnvironmentBadge environment={params.value as Environment} />;
 }
 
 interface AutomationsGridProps {
   searchText: string;
+  statusFilter: StatusFilterPreset | null;
+  onStatusFilterChange: (status: StatusFilterPreset | null) => void;
 }
 
-export function AutomationsGrid({ searchText }: AutomationsGridProps) {
+export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange }: AutomationsGridProps) {
   const automations = useAutomationStore((s) => s.automations);
   const updateAutomation = useAutomationStore((s) => s.updateAutomation);
   const deleteAutomation = useAutomationStore((s) => s.deleteAutomation);
@@ -47,6 +75,22 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showEmpty, setShowEmpty] = useState(false);
   const [tier, setTier] = useState<WidthTier>('medium');
+
+  // Seed the grid with the preset from the URL so the first render is already
+  // filtered; later URL changes are pushed in through the grid API below.
+  const [initialState] = useState<GridState | undefined>(() =>
+    statusFilter ? { filter: { filterModel: { status: statusFilterModel(statusFilter) } } } : undefined
+  );
+
+  // Keep the grid in step with the URL, including back/forward navigation.
+  useEffect(() => {
+    const api = gridRef.current?.api;
+    if (!api || api.isDestroyed()) return;
+    if (presetFromGrid(api) === statusFilter) return;
+    void api
+      .setColumnFilterModel('status', statusFilter ? statusFilterModel(statusFilter) : null)
+      .then(() => api.onFilterChanged());
+  }, [statusFilter]);
 
   // Storing the tier rather than the raw width means React bails out of
   // re-rendering unless a threshold is actually crossed, so the sidebar's width
@@ -225,8 +269,19 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
     [updateAutomation]
   );
 
+  // Reflect the user's own Status filter edits back into the URL. Changes the
+  // grid makes through the API (from the URL) are skipped to avoid a loop.
   const onFilterChanged = useCallback(
-    (event: FilterChangedEvent) => {
+    (event: FilterChangedEvent<Automation>) => {
+      if (event.source === 'api' || event.source === 'quickFilter') return;
+      const preset = presetFromGrid(event.api);
+      if (preset !== statusFilter) onStatusFilterChange(preset);
+    },
+    [statusFilter, onStatusFilterChange]
+  );
+
+  const onModelUpdated = useCallback(
+    (event: ModelUpdatedEvent<Automation>) => {
       const count = event.api.getDisplayedRowCount();
       setShowEmpty(count === 0 && searchText.length > 0);
     },
@@ -252,6 +307,8 @@ export function AutomationsGrid({ searchText }: AutomationsGridProps) {
           onRowClicked={onRowClicked}
           onCellValueChanged={onCellValueChanged}
           onFilterChanged={onFilterChanged}
+          onModelUpdated={onModelUpdated}
+          initialState={initialState}
           getRowId={(params) => params.data.id}
           animateRows={true}
         />

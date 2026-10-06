@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { pageContainerVariants, pageItemVariants } from '@/lib/motion';
 import { AutomationsGrid } from '@/components/automations/AutomationsGrid';
@@ -6,11 +7,29 @@ import { AddAutomationDialog } from '@/components/automations/AddAutomationDialo
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
+import { parseStatusFilterPreset } from '@/types/automation';
+import type { StatusFilterPreset } from '@/types/automation';
 
 export function AutomationsPage() {
   const [searchText, setSearchText] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Only real automation statuses count as a preset; anything else in the
+  // query is ignored.
+  const statusFilter = parseStatusFilterPreset(searchParams.get('status'));
+
+  const setStatusFilter = useCallback(
+    (status: StatusFilterPreset | null) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (status) next.set('status', status);
+        else next.delete('status');
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
 
   return (
     <motion.div
@@ -41,7 +60,11 @@ export function AutomationsPage() {
       </motion.div>
 
       <motion.div variants={pageItemVariants}>
-        <AutomationsGrid searchText={searchText} />
+        <AutomationsGrid
+          searchText={searchText}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+        />
       </motion.div>
 
       <AddAutomationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
