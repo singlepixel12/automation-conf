@@ -34,6 +34,43 @@ import { toast } from '@/lib/useToast';
 import { motion, useReducedMotion } from 'framer-motion';
 import { pageContainerVariants, pageItemVariants } from '@/lib/motion';
 
+type JsonValueTokenType = 'key' | 'string' | 'number' | 'boolean' | 'null';
+type JsonToken = { type: JsonValueTokenType | 'plain'; text: string };
+
+// Three achromatic layers so JSON tokens don't borrow the app's semantic color families (status, type, secret):
+// keys, scalar values, and punctuation/unmatched text (applied to the <pre>; keys and values override it).
+// Explicit light/dark pairs; each meets WCAG AA (>= 4.5:1) against bg-muted in its theme, and keys vs values >= 2:1.
+const JSON_KEY_CLASS = 'text-[oklch(0.25_0_0)] dark:text-[oklch(0.98_0_0)]';
+const JSON_VALUE_CLASS = 'text-[oklch(0.47_0_0)] dark:text-[oklch(0.73_0_0)]';
+const JSON_PUNCTUATION_CLASS = 'text-[oklch(0.54_0_0)] dark:text-[oklch(0.66_0_0)]';
+const JSON_TOKEN_CLASSES: Record<JsonValueTokenType, string> = {
+  key: JSON_KEY_CLASS,
+  string: JSON_VALUE_CLASS,
+  number: JSON_VALUE_CLASS,
+  boolean: JSON_VALUE_CLASS,
+  null: JSON_VALUE_CLASS,
+};
+
+// Group order matches JSON_TOKEN_GROUPS. Strings honor escapes (\" and \\); a string followed by ":" is a key.
+const JSON_TOKEN_PATTERN =
+  /("(?:[^"\\]|\\.)*")(?=\s*:)|("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false)\b|\b(null)\b/g;
+const JSON_TOKEN_GROUPS: JsonValueTokenType[] = ['key', 'string', 'number', 'boolean', 'null'];
+
+// Tokenizes an already-serialized JSON string; concatenating token text reproduces the input exactly.
+function tokenizeJson(json: string): JsonToken[] {
+  const tokens: JsonToken[] = [];
+  let lastIndex = 0;
+  for (const match of json.matchAll(JSON_TOKEN_PATTERN)) {
+    const index = match.index;
+    if (index > lastIndex) tokens.push({ type: 'plain', text: json.slice(lastIndex, index) });
+    const group = match.findIndex((g, i) => i > 0 && g !== undefined);
+    tokens.push({ type: JSON_TOKEN_GROUPS[group - 1], text: match[0] });
+    lastIndex = index + match[0].length;
+  }
+  if (lastIndex < json.length) tokens.push({ type: 'plain', text: json.slice(lastIndex) });
+  return tokens;
+}
+
 export function ConfigDetailPage() {
   const { id } = useParams<{ id: string }>();
   const automation = useAutomationStore((s) => s.automations.find((a) => a.id === id));
@@ -294,8 +331,21 @@ export function ConfigDetailPage() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <pre className="rounded-md bg-muted p-4 overflow-auto max-h-[600px] text-sm font-mono leading-relaxed">
-                  {jsonOutput}
+                <pre
+                  className={cn(
+                    'rounded-md bg-muted p-4 overflow-auto max-h-[600px] text-sm font-mono leading-relaxed',
+                    JSON_PUNCTUATION_CLASS
+                  )}
+                >
+                  {tokenizeJson(jsonOutput).map((token, i) =>
+                    token.type === 'plain' ? (
+                      token.text
+                    ) : (
+                      <span key={i} className={JSON_TOKEN_CLASSES[token.type]}>
+                        {token.text}
+                      </span>
+                    )
+                  )}
                 </pre>
               </CardContent>
             </Card>
