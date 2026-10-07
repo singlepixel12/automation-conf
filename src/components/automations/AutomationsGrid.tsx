@@ -11,15 +11,19 @@ import type {
   GridState,
   ICellRendererParams,
   ModelUpdatedEvent,
+  OverlayType,
   TextFilterModel,
 } from 'ag-grid-community';
 import { useAutomationStore } from '@/stores/automationStore';
 import { StatusBadge } from './StatusBadge';
 import { EnvironmentBadge } from './EnvironmentBadge';
-import { TYPE_LABELS, parseStatusFilterPreset } from '@/types/automation';
+import { Button } from '@/components/ui/button';
+import { ERROR_PRESENTATION, TYPE_LABELS, parseStatusFilterPreset } from '@/types/automation';
 import type { Automation, Environment, StatusFilterPreset } from '@/types/automation';
-import { Trash2, SearchX } from 'lucide-react';
+import { Trash2, SearchX, Inbox, Plus, AlertTriangle, RotateCw } from 'lucide-react';
 import { toast } from '@/lib/useToast';
+import { getGridDisplayState, hasActiveGridFilters } from './automationsGridState';
+import type { GridDataStatus } from './automationsGridState';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -31,6 +35,14 @@ ModuleRegistry.registerModules([AllCommunityModule]);
  */
 const ALL_COLUMNS_MIN_WIDTH = 1180; // core columns + Version + Tags
 const VERSION_MIN_WIDTH = 980; // core columns + Version
+
+/**
+ * The empty and no-match states rendered alongside the grid replace AG Grid's
+ * generic overlays. noMatchingRows is shown automatically whenever filters
+ * leave zero rows, so it must be suppressed explicitly. Module-level so the
+ * grid receives a stable reference.
+ */
+const SUPPRESSED_OVERLAYS: OverlayType[] = ['noRows', 'noMatchingRows'];
 
 type WidthTier = 'wide' | 'medium' | 'narrow';
 
@@ -64,16 +76,41 @@ interface AutomationsGridProps {
   searchText: string;
   statusFilter: StatusFilterPreset | null;
   onStatusFilterChange: (status: StatusFilterPreset | null) => void;
+  /** Clears the page-owned filters: quick search and the URL status preset. */
+  onClearFilters: () => void;
+  onAddAutomation: () => void;
+  /** Always 'ready' for the in-memory store; see GridDataStatus. */
+  dataStatus?: GridDataStatus;
+  onRetry?: () => void;
 }
 
-export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange }: AutomationsGridProps) {
+/** What AG Grid last reported about its row model. */
+interface GridModelSnapshot {
+  ready: boolean;
+  displayedCount: number;
+  columnFilterPresent: boolean;
+}
+
+export function AutomationsGrid({
+  searchText,
+  statusFilter,
+  onStatusFilterChange,
+  onClearFilters,
+  onAddAutomation,
+  dataStatus = 'ready',
+  onRetry,
+}: AutomationsGridProps) {
   const automations = useAutomationStore((s) => s.automations);
   const updateAutomation = useAutomationStore((s) => s.updateAutomation);
   const deleteAutomation = useAutomationStore((s) => s.deleteAutomation);
   const navigate = useNavigate();
   const gridRef = useRef<AgGridReact<Automation>>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showEmpty, setShowEmpty] = useState(false);
+  const [model, setModel] = useState<GridModelSnapshot>({
+    ready: false,
+    displayedCount: 0,
+    columnFilterPresent: false,
+  });
   const [tier, setTier] = useState<WidthTier>('medium');
 
   // Seed the grid with the preset from the URL so the first render is already
@@ -280,17 +317,50 @@ export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange
     [statusFilter, onStatusFilterChange]
   );
 
-  const onModelUpdated = useCallback(
-    (event: ModelUpdatedEvent<Automation>) => {
-      const count = event.api.getDisplayedRowCount();
-      setShowEmpty(count === 0 && searchText.length > 0);
-    },
-    [searchText]
-  );
+  // Model updates follow quick search, column filters and row data changes
+  // alike, so a column filter left on a status no row has any more (say, after
+  // "disable all") is caught here as well as an explicit filter change.
+  const onModelUpdated = useCallback((event: ModelUpdatedEvent<Automation>) => {
+    const next: GridModelSnapshot = {
+      ready: true,
+      displayedCount: event.api.getDisplayedRowCount(),
+      columnFilterPresent: event.api.isColumnFilterPresent(),
+    };
+    setModel((prev) =>
+      prev.ready === next.ready &&
+      prev.displayedCount === next.displayedCount &&
+      prev.columnFilterPresent === next.columnFilterPresent
+        ? prev
+        : next
+    );
+  }, []);
+
+  const displayState = getGridDisplayState({
+    dataStatus,
+    totalCount: automations.length,
+    displayedCount: model.displayedCount,
+    hasActiveFilters: hasActiveGridFilters(searchText, model.columnFilterPresent),
+    modelReady: model.ready,
+  });
+
+  // The grid's own filter change is an API one, so onFilterChanged won't touch
+  // the URL; the page drops the status preset itself, and the URL effect then
+  // finds the grid already unfiltered.
+  const clearFilters = useCallback(() => {
+    gridRef.current?.api?.setFilterModel(null);
+    onClearFilters();
+  }, [onClearFilters]);
 
   return (
     <div className="relative">
-      <div ref={containerRef} className="automations-grid" style={{ height: 600 }}>
+      {/* While loading or errored the rows are stale or absent, so the grid is
+          taken out of focus order and pointer/keyboard interaction entirely. */}
+      <div
+        ref={containerRef}
+        className="automations-grid"
+        style={{ height: 600 }}
+        inert={displayState === 'loading' || displayState === 'error'}
+      >
         <AgGridReact<Automation>
           ref={gridRef}
           theme={themeQuartz}
@@ -311,12 +381,43 @@ export function AutomationsGrid({ searchText, statusFilter, onStatusFilterChange
           initialState={initialState}
           getRowId={(params) => params.data.id}
           animateRows={true}
+          loading={displayState === 'loading'}
+          suppressOverlays={SUPPRESSED_OVERLAYS}
         />
       </div>
-      {showEmpty && (
+      {/* The empty overlays let clicks through to the grid (header filter menus
+          stay usable); only their action buttons opt back in. */}
+      {displayState === 'empty' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 pointer-events-none">
+          <Inbox className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
+          <p className="text-sm font-medium text-foreground">No automations yet.</p>
+          <p className="text-sm text-muted-foreground mb-4">Add an automation to start managing its configuration.</p>
+          <Button className="pointer-events-auto" onClick={onAddAutomation}>
+            <Plus className="h-4 w-4" />
+            Add Automation
+          </Button>
+        </div>
+      )}
+      {displayState === 'filtered-empty' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 pointer-events-none">
           <SearchX className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
-          <p className="text-sm text-muted-foreground">No automations match your search.</p>
+          <p className="text-sm text-muted-foreground mb-4">No automations match your filters.</p>
+          <Button variant="outline" className="pointer-events-auto" onClick={clearFilters}>
+            Clear filters
+          </Button>
+        </div>
+      )}
+      {/* The error overlay, unlike the empty ones, blocks the grid beneath it. */}
+      {displayState === 'error' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
+          <AlertTriangle className={`h-10 w-10 mb-3 ${ERROR_PRESENTATION.statValue}`} />
+          <p className={`text-sm text-muted-foreground ${onRetry ? 'mb-4' : ''}`}>Couldn't load automations.</p>
+          {onRetry && (
+            <Button variant="outline" onClick={onRetry}>
+              <RotateCw className="h-4 w-4" />
+              Try again
+            </Button>
+          )}
         </div>
       )}
     </div>
